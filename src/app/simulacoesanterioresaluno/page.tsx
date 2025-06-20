@@ -7,9 +7,10 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
-import { getDatabase, ref, onValue } from "firebase/database";
+import { getDatabase, ref, onValue, remove } from "firebase/database";
 import { app } from "../../../lib/firebaseConfig";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 interface Simulacao {
   id: string;
@@ -42,6 +43,24 @@ const SimulacoesAnterioresAluno: React.FC = () => {
   const [modoComparacao, setModoComparacao] = useState(false);
   const [simulacoesSelecionadas, setSimulacoesSelecionadas] = useState<Simulacao[]>([]);
   const [modalComparacaoAberto, setModalComparacaoAberto] = useState(false);
+
+  // Estados para confirmação de exclusão
+  const [modalConfirmacaoAberto, setModalConfirmacaoAberto] = useState(false);
+  const [simulacaoParaExcluir, setSimulacaoParaExcluir] = useState<Simulacao | null>(null);
+
+  // Função para garantir que o valor seja um número e formatá-lo
+  const formatarNumero = (valor: any, casasDecimais: number = 2): string => {
+    if (valor === null || valor === undefined || valor === '') {
+      return "N/A";
+    }
+    
+    const numero = Number(valor);
+    if (isNaN(numero)) {
+      return "N/A";
+    }
+    
+    return numero.toFixed(casasDecimais);
+  };
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -138,6 +157,37 @@ const SimulacoesAnterioresAluno: React.FC = () => {
     setSimulacoesSelecionadas([]);
   };
 
+  // Funções para exclusão de simulação
+  const confirmarExclusao = (simulacao: Simulacao, event: React.MouseEvent) => {
+    event.stopPropagation(); // Impede que o modal de detalhes seja aberto
+    setSimulacaoParaExcluir(simulacao);
+    setModalConfirmacaoAberto(true);
+  };
+
+  const excluirSimulacao = async () => {
+    if (!simulacaoParaExcluir) return;
+
+    try {
+      const database = getDatabase(app);
+      const simulacaoRef = ref(database, `simulacoes/${simulacaoParaExcluir.id}`);
+      await remove(simulacaoRef);
+      
+      // Atualizar a lista local removendo a simulação excluída
+      setSimulacoes(simulacoes.filter(s => s.id !== simulacaoParaExcluir.id));
+      
+      setModalConfirmacaoAberto(false);
+      setSimulacaoParaExcluir(null);
+    } catch (error) {
+      console.error("Erro ao excluir simulação:", error);
+      alert("Erro ao excluir simulação. Tente novamente.");
+    }
+  };
+
+  const cancelarExclusao = () => {
+    setModalConfirmacaoAberto(false);
+    setSimulacaoParaExcluir(null);
+  };
+
   const DetalhesModal = () => {
     if (!simulacaoSelecionada) return null;
     const { timestamp, dados } = simulacaoSelecionada;
@@ -171,19 +221,19 @@ const SimulacoesAnterioresAluno: React.FC = () => {
                 <div className="space-y-2 text-black">
                   <p>
                     <span className="font-semibold">Distância:</span>{" "}
-                    {dados?.distancia?.toFixed(2) || "N/A"} m
+                    {formatarNumero(dados?.distancia)} m
                   </p>
                   <p>
                     <span className="font-semibold">Ângulo:</span>{" "}
-                    {dados?.angulo?.toFixed(2) || "N/A"}°
+                    {formatarNumero(dados?.angulo)}°
                   </p>
                   <p>
                     <span className="font-semibold">Velocidade:</span>{" "}
-                    {dados?.velocidade?.toFixed(2) || "N/A"} m/s
+                    {formatarNumero(dados?.velocidade)} m/s
                   </p>
                   <p>
                     <span className="font-semibold">Aceleração:</span>{" "}
-                    {dados?.aceleracao?.toFixed(2) || "N/A"} m/s²
+                    {formatarNumero(dados?.aceleracao)} m/s²
                   </p>
                 </div>
               </div>
@@ -195,24 +245,24 @@ const SimulacoesAnterioresAluno: React.FC = () => {
                 <div className="space-y-2 text-black">
                   <p>
                     <span className="font-semibold">Força Peso:</span>{" "}
-                    {dados?.forcaPeso?.toFixed(2) || "N/A"} N
+                    {formatarNumero(dados?.forcaPeso)} N
                   </p>
                   <p>
                     <span className="font-semibold">Força Normal:</span>{" "}
-                    {dados?.forcaNormal?.toFixed(2) || "N/A"} N
+                    {formatarNumero(dados?.forcaNormal)} N
                   </p>
                   <p>
                     <span className="font-semibold">Força de Atrito:</span>{" "}
-                    {dados?.forcaAtrito?.toFixed(2) || "N/A"} N
+                    {formatarNumero(dados?.forcaAtrito)} N
                   </p>
                   <p>
                     <span className="font-semibold">Força Resultante:</span>{" "}
-                    {dados?.forcaResultante?.toFixed(2) || "N/A"} N
+                    {formatarNumero(dados?.forcaResultante)} N
                   </p>
                   <p>
                     <span className="font-semibold">Px / Py:</span>{" "}
-                    {dados?.px?.toFixed(2) || "N/A"} /{" "}
-                    {dados?.py?.toFixed(2) || "N/A"} N
+                    {formatarNumero(dados?.px)} /{" "}
+                    {formatarNumero(dados?.py)} N
                   </p>
                 </div>
               </div>
@@ -224,6 +274,43 @@ const SimulacoesAnterioresAluno: React.FC = () => {
                 className="bg-purple-600 text-white px-8 py-3 rounded-md font-bold hover:bg-purple-700 transition duration-300"
               >
                 Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const ModalConfirmacaoExclusao = () => {
+    if (!simulacaoParaExcluir) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+          <div className="p-6">
+            <h2 className="text-xl font-bold text-red-600 mb-4">
+              Confirmar Exclusão
+            </h2>
+            <p className="text-gray-700 mb-6">
+              Tem certeza que deseja excluir a simulação de{" "}
+              <strong>{formatarData(simulacaoParaExcluir.timestamp)}</strong>?
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              Esta ação não pode ser desfeita.
+            </p>
+            <div className="flex gap-4 justify-end">
+              <button
+                onClick={cancelarExclusao}
+                className="px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition duration-300"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={excluirSimulacao}
+                className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-300"
+              >
+                Excluir
               </button>
             </div>
           </div>
@@ -278,10 +365,10 @@ const SimulacoesAnterioresAluno: React.FC = () => {
               <div className=" text-purple-950 font-bold text-center py-2 bg-gray-200">Aceleração</div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-purple-600 text-white text-center py-3 rounded">
-                  {simulacao1.dados?.aceleracao?.toFixed(2) || "N/A"} m/s²
+                  {formatarNumero(simulacao1.dados?.aceleracao)} m/s²
                 </div>
                 <div className="bg-purple-600 text-white text-center py-3 rounded">
-                  {simulacao2.dados?.aceleracao?.toFixed(2) || "N/A"} m/s²
+                  {formatarNumero(simulacao2.dados?.aceleracao)} m/s²
                 </div>
               </div>
             </div>
@@ -291,10 +378,10 @@ const SimulacoesAnterioresAluno: React.FC = () => {
               <div className="text-purple-950 font-bold text-center  py-2 bg-gray-200">Força Peso</div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-purple-600 text-white text-center py-3 rounded">
-                  {simulacao1.dados?.forcaPeso?.toFixed(2) || "N/A"} N
+                  {formatarNumero(simulacao1.dados?.forcaPeso)} N
                 </div>
                 <div className="bg-purple-600 text-white text-center py-3 rounded">
-                  {simulacao2.dados?.forcaPeso?.toFixed(2) || "N/A"} N
+                  {formatarNumero(simulacao2.dados?.forcaPeso)} N
                 </div>
               </div>
             </div>
@@ -304,10 +391,10 @@ const SimulacoesAnterioresAluno: React.FC = () => {
               <div className="text-purple-950 font-bold text-center py-2 bg-gray-200">Força Atrito</div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-purple-600 text-white text-center py-3 rounded">
-                  {simulacao1.dados?.forcaAtrito?.toFixed(2) || "N/A"} N
+                  {formatarNumero(simulacao1.dados?.forcaAtrito)} N
                 </div>
                 <div className="bg-purple-600 text-white text-center py-3 rounded">
-                  {simulacao2.dados?.forcaAtrito?.toFixed(2) || "N/A"} N
+                  {formatarNumero(simulacao2.dados?.forcaAtrito)} N
                 </div>
               </div>
             </div>
@@ -317,10 +404,10 @@ const SimulacoesAnterioresAluno: React.FC = () => {
               <div className="text-purple-950 font-bold text-center py-2 bg-gray-200">Px/Py</div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-purple-600 text-white text-center py-3 rounded">
-                  {simulacao1.dados?.px?.toFixed(2) || "N/A"} / {simulacao1.dados?.py?.toFixed(2) || "N/A"} N
+                  {formatarNumero(simulacao1.dados?.px)} / {formatarNumero(simulacao1.dados?.py)} N
                 </div>
                 <div className="bg-purple-600 text-white text-center py-3 rounded">
-                  {simulacao2.dados?.px?.toFixed(2) || "N/A"} / {simulacao2.dados?.py?.toFixed(2) || "N/A"} N
+                  {formatarNumero(simulacao2.dados?.px)} / {formatarNumero(simulacao2.dados?.py)} N
                 </div>
               </div>
             </div>
@@ -330,10 +417,23 @@ const SimulacoesAnterioresAluno: React.FC = () => {
               <div className="text-purple-950 font-bold text-center py-2 bg-gray-200">Força Normal</div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-purple-600 text-white text-center py-3 rounded">
-                  {simulacao1.dados?.forcaNormal?.toFixed(2) || "N/A"} N
+                  {formatarNumero(simulacao1.dados?.forcaNormal)} N
                 </div>
                 <div className="bg-purple-600 text-white text-center py-3 rounded">
-                  {simulacao2.dados?.forcaNormal?.toFixed(2) || "N/A"} N
+                  {formatarNumero(simulacao2.dados?.forcaNormal)} N
+                </div>
+              </div>
+            </div>
+
+            {/* Força Resultante */}
+            <div className="mb-4">
+              <div className="text-purple-950 font-bold text-center py-2 bg-gray-200">Força Resultante</div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-purple-600 text-white text-center py-3 rounded">
+                  {formatarNumero(simulacao1.dados?.forcaResultante)} N
+                </div>
+                <div className="bg-purple-600 text-white text-center py-3 rounded">
+                  {formatarNumero(simulacao2.dados?.forcaResultante)} N
                 </div>
               </div>
             </div>
@@ -473,17 +573,28 @@ const SimulacoesAnterioresAluno: React.FC = () => {
                   {simulacoes.map((simulacao) => (
                     <div
                       key={simulacao.id}
-                      className={`bg-white p-6 rounded-lg shadow-md hover:bg-purple-50 transition duration-300 cursor-pointer ${
+                      className={`bg-white p-6 rounded-lg shadow-md hover:bg-purple-50 transition duration-300 cursor-pointer relative ${
                         modoComparacao && simulacoesSelecionadas.find(s => s.id === simulacao.id)
                           ? "border-4 border-purple-600"
                           : ""
                       }`}
                       onClick={() => abrirModal(simulacao)}
                     >
-                      <h2 className="text-xl font-bold text-purple-800 mb-2">
-                        Simulação em {formatarData(simulacao.timestamp)}
-                      </h2>
-                      <p className="text-gray-700">Status: {simulacao.status}</p>
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h2 className="text-xl font-bold text-purple-800 mb-2">
+                            Simulação em {formatarData(simulacao.timestamp)}
+                          </h2>
+                          <p className="text-gray-700">Status: {simulacao.status}</p>
+                        </div>
+                        <button
+                          onClick={(e) => confirmarExclusao(simulacao, e)}
+                          className="ml-4 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition duration-300"
+                          title="Excluir simulação"
+                        >
+                          <DeleteIcon />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -497,6 +608,7 @@ const SimulacoesAnterioresAluno: React.FC = () => {
 
       {modalAberto && <DetalhesModal />}
       {modalComparacaoAberto && <ComparacaoModal />}
+      {modalConfirmacaoAberto && <ModalConfirmacaoExclusao />}
     </div>
   );
 };
