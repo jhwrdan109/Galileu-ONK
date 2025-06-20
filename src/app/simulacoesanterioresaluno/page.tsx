@@ -11,6 +11,7 @@ import { getDatabase, ref, onValue, remove } from "firebase/database";
 import { app } from "../../../lib/firebaseConfig";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteIcon from "@mui/icons-material/Delete";
+import MenuIcon from "@mui/icons-material/Menu";
 
 interface Simulacao {
   id: string;
@@ -38,6 +39,7 @@ const SimulacoesAnterioresAluno: React.FC = () => {
   const [simulacoes, setSimulacoes] = useState<Simulacao[]>([]);
   const [simulacaoSelecionada, setSimulacaoSelecionada] = useState<Simulacao | null>(null);
   const [modalAberto, setModalAberto] = useState(false);
+  const [menuMobileAberto, setMenuMobileAberto] = useState(false);
   
   // Estados para o modo de comparação
   const [modoComparacao, setModoComparacao] = useState(false);
@@ -188,37 +190,56 @@ const SimulacoesAnterioresAluno: React.FC = () => {
     setSimulacaoParaExcluir(null);
   };
 
+  const toggleMenuMobile = () => {
+    setMenuMobileAberto(!menuMobileAberto);
+  };
+
+  // Função para fechar o menu mobile ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (menuMobileAberto && !target.closest('.menu-mobile-container')) {
+        setMenuMobileAberto(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuMobileAberto]);
+
   const DetalhesModal = () => {
     if (!simulacaoSelecionada) return null;
     const { timestamp, dados } = simulacaoSelecionada;
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="flex justify-between items-center p-6 border-b border-gray-200">
-            <h2 className="text-2xl font-bold text-purple-800">
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto mx-2 sm:mx-0">
+          <div className="flex justify-between items-center p-4 sm:p-6 border-b border-gray-200">
+            <h2 className="text-lg sm:text-2xl font-bold text-purple-800">
               Detalhes da Simulação
             </h2>
             <button
               onClick={fecharModal}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 hover:text-gray-700 p-1"
             >
               <CloseIcon fontSize="large" />
             </button>
           </div>
 
-          <div className="p-6">
-            <p className="text-lg font-medium mb-4 text-black">
+          <div className="p-4 sm:p-6">
+            <p className="text-base sm:text-lg font-medium mb-4 text-black">
               <span className="text-purple-600">Data da Simulação:</span>{" "}
               {formatarData(timestamp)}
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div className="bg-purple-100 p-4 rounded-lg">
-                <h3 className="text-lg font-bold mb-3 text-purple-800">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
+              <div className="bg-purple-100 p-3 sm:p-4 rounded-lg">
+                <h3 className="text-base sm:text-lg font-bold mb-3 text-purple-800">
                   Medidas
                 </h3>
-                <div className="space-y-2 text-black">
+                <div className="space-y-2 text-black text-sm sm:text-base">
                   <p>
                     <span className="font-semibold">Distância:</span>{" "}
                     {formatarNumero(dados?.distancia)} m
@@ -238,11 +259,11 @@ const SimulacoesAnterioresAluno: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-purple-100 p-4 rounded-lg">
-                <h3 className="text-lg font-bold mb-3 text-purple-800">
+              <div className="bg-purple-100 p-3 sm:p-4 rounded-lg">
+                <h3 className="text-base sm:text-lg font-bold mb-3 text-purple-800">
                   Forças
                 </h3>
-                <div className="space-y-2 text-black">
+                <div className="space-y-2 text-black text-sm sm:text-base">
                   <p>
                     <span className="font-semibold">Força Peso:</span>{" "}
                     {formatarNumero(dados?.forcaPeso)} N
@@ -271,7 +292,7 @@ const SimulacoesAnterioresAluno: React.FC = () => {
             <div className="mt-6 text-center">
               <button
                 onClick={fecharModal}
-                className="bg-purple-600 text-white px-8 py-3 rounded-md font-bold hover:bg-purple-700 transition duration-300"
+                className="bg-purple-600 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-md font-bold hover:bg-purple-700 transition duration-300 text-sm sm:text-base"
               >
                 Fechar
               </button>
@@ -287,28 +308,28 @@ const SimulacoesAnterioresAluno: React.FC = () => {
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-          <div className="p-6">
-            <h2 className="text-xl font-bold text-red-600 mb-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-2">
+          <div className="p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-bold text-red-600 mb-4">
               Confirmar Exclusão
             </h2>
-            <p className="text-gray-700 mb-6">
+            <p className="text-gray-700 mb-4 sm:mb-6 text-sm sm:text-base">
               Tem certeza que deseja excluir a simulação de{" "}
               <strong>{formatarData(simulacaoParaExcluir.timestamp)}</strong>?
             </p>
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6">
               Esta ação não pode ser desfeita.
             </p>
-            <div className="flex gap-4 justify-end">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:justify-end">
               <button
                 onClick={cancelarExclusao}
-                className="px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition duration-300"
+                className="px-4 sm:px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 transition duration-300 text-sm sm:text-base"
               >
                 Cancelar
               </button>
               <button
                 onClick={excluirSimulacao}
-                className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-300"
+                className="px-4 sm:px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-300 text-sm sm:text-base"
               >
                 Excluir
               </button>
@@ -326,35 +347,35 @@ const SimulacoesAnterioresAluno: React.FC = () => {
     const simulacao2 = simulacoesSelecionadas[1];
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
-          <div className="flex justify-between items-center p-6 border-b border-gray-200">
-            <h2 className="text-2xl font-bold text-purple-800">
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto mx-2 sm:mx-0">
+          <div className="flex justify-between items-center p-4 sm:p-6 border-b border-gray-200">
+            <h2 className="text-lg sm:text-2xl font-bold text-purple-800">
               Comparação de Simulações
             </h2>
             <button
               onClick={fecharModalComparacao}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 hover:text-gray-700 p-1"
             >
               <CloseIcon fontSize="large" />
             </button>
           </div>
 
-          <div className="p-6">
-            <div className="grid grid-cols-2 gap-8">
+          <div className="p-4 sm:p-6">
+            <div className="grid grid-cols-2 gap-4 sm:gap-8 mb-6">
               <div className="text-center">
-                <h3 className="text-xl font-bold mb-2 text-purple-800">
+                <h3 className="text-base sm:text-xl font-bold mb-2 text-purple-800">
                   Experimento 1
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-xs sm:text-sm text-gray-600 mb-4">
                   {formatarData(simulacao1.timestamp)}
                 </p>
               </div>
               <div className="text-center">
-                <h3 className="text-xl font-bold mb-2 text-purple-800">
+                <h3 className="text-base sm:text-xl font-bold mb-2 text-purple-800">
                   Experimento 2
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="text-xs sm:text-sm text-gray-600 mb-4">
                   {formatarData(simulacao2.timestamp)}
                 </p>
               </div>
@@ -362,12 +383,12 @@ const SimulacoesAnterioresAluno: React.FC = () => {
 
             {/* Aceleração */}
             <div className="mb-4">
-              <div className=" text-purple-950 font-bold text-center py-2 bg-gray-200">Aceleração</div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-purple-600 text-white text-center py-3 rounded">
+              <div className="text-purple-950 font-bold text-center py-2 bg-gray-200 text-sm sm:text-base">Aceleração</div>
+              <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                <div className="bg-purple-600 text-white text-center py-2 sm:py-3 rounded text-sm sm:text-base">
                   {formatarNumero(simulacao1.dados?.aceleracao)} m/s²
                 </div>
-                <div className="bg-purple-600 text-white text-center py-3 rounded">
+                <div className="bg-purple-600 text-white text-center py-2 sm:py-3 rounded text-sm sm:text-base">
                   {formatarNumero(simulacao2.dados?.aceleracao)} m/s²
                 </div>
               </div>
@@ -375,12 +396,12 @@ const SimulacoesAnterioresAluno: React.FC = () => {
 
             {/* Força Peso */}
             <div className="mb-4">
-              <div className="text-purple-950 font-bold text-center  py-2 bg-gray-200">Força Peso</div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-purple-600 text-white text-center py-3 rounded">
+              <div className="text-purple-950 font-bold text-center py-2 bg-gray-200 text-sm sm:text-base">Força Peso</div>
+              <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                <div className="bg-purple-600 text-white text-center py-2 sm:py-3 rounded text-sm sm:text-base">
                   {formatarNumero(simulacao1.dados?.forcaPeso)} N
                 </div>
-                <div className="bg-purple-600 text-white text-center py-3 rounded">
+                <div className="bg-purple-600 text-white text-center py-2 sm:py-3 rounded text-sm sm:text-base">
                   {formatarNumero(simulacao2.dados?.forcaPeso)} N
                 </div>
               </div>
@@ -388,12 +409,12 @@ const SimulacoesAnterioresAluno: React.FC = () => {
 
             {/* Força Atrito */}
             <div className="mb-4">
-              <div className="text-purple-950 font-bold text-center py-2 bg-gray-200">Força Atrito</div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-purple-600 text-white text-center py-3 rounded">
+              <div className="text-purple-950 font-bold text-center py-2 bg-gray-200 text-sm sm:text-base">Força Atrito</div>
+              <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                <div className="bg-purple-600 text-white text-center py-2 sm:py-3 rounded text-sm sm:text-base">
                   {formatarNumero(simulacao1.dados?.forcaAtrito)} N
                 </div>
-                <div className="bg-purple-600 text-white text-center py-3 rounded">
+                <div className="bg-purple-600 text-white text-center py-2 sm:py-3 rounded text-sm sm:text-base">
                   {formatarNumero(simulacao2.dados?.forcaAtrito)} N
                 </div>
               </div>
@@ -401,12 +422,12 @@ const SimulacoesAnterioresAluno: React.FC = () => {
 
             {/* Px/Py */}
             <div className="mb-4">
-              <div className="text-purple-950 font-bold text-center py-2 bg-gray-200">Px/Py</div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-purple-600 text-white text-center py-3 rounded">
+              <div className="text-purple-950 font-bold text-center py-2 bg-gray-200 text-sm sm:text-base">Px/Py</div>
+              <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                <div className="bg-purple-600 text-white text-center py-2 sm:py-3 rounded text-sm sm:text-base">
                   {formatarNumero(simulacao1.dados?.px)} / {formatarNumero(simulacao1.dados?.py)} N
                 </div>
-                <div className="bg-purple-600 text-white text-center py-3 rounded">
+                <div className="bg-purple-600 text-white text-center py-2 sm:py-3 rounded text-sm sm:text-base">
                   {formatarNumero(simulacao2.dados?.px)} / {formatarNumero(simulacao2.dados?.py)} N
                 </div>
               </div>
@@ -414,12 +435,12 @@ const SimulacoesAnterioresAluno: React.FC = () => {
 
             {/* Força Normal */}
             <div className="mb-4">
-              <div className="text-purple-950 font-bold text-center py-2 bg-gray-200">Força Normal</div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-purple-600 text-white text-center py-3 rounded">
+              <div className="text-purple-950 font-bold text-center py-2 bg-gray-200 text-sm sm:text-base">Força Normal</div>
+              <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                <div className="bg-purple-600 text-white text-center py-2 sm:py-3 rounded text-sm sm:text-base">
                   {formatarNumero(simulacao1.dados?.forcaNormal)} N
                 </div>
-                <div className="bg-purple-600 text-white text-center py-3 rounded">
+                <div className="bg-purple-600 text-white text-center py-2 sm:py-3 rounded text-sm sm:text-base">
                   {formatarNumero(simulacao2.dados?.forcaNormal)} N
                 </div>
               </div>
@@ -427,21 +448,21 @@ const SimulacoesAnterioresAluno: React.FC = () => {
 
             {/* Força Resultante */}
             <div className="mb-4">
-              <div className="text-purple-950 font-bold text-center py-2 bg-gray-200">Força Resultante</div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-purple-600 text-white text-center py-3 rounded">
+              <div className="text-purple-950 font-bold text-center py-2 bg-gray-200 text-sm sm:text-base">Força Resultante</div>
+              <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                <div className="bg-purple-600 text-white text-center py-2 sm:py-3 rounded text-sm sm:text-base">
                   {formatarNumero(simulacao1.dados?.forcaResultante)} N
                 </div>
-                <div className="bg-purple-600 text-white text-center py-3 rounded">
+                <div className="bg-purple-600 text-white text-center py-2 sm:py-3 rounded text-sm sm:text-base">
                   {formatarNumero(simulacao2.dados?.forcaResultante)} N
                 </div>
               </div>
             </div>
 
-            <div className="mt-8 text-center">
+            <div className="mt-6 sm:mt-8 text-center">
               <button
                 onClick={fecharModalComparacao}
-                className="bg-purple-600 text-white px-8 py-3 rounded-md font-bold hover:bg-purple-700 transition duration-300"
+                className="bg-purple-600 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-md font-bold hover:bg-purple-700 transition duration-300 text-sm sm:text-base"
               >
                 Fechar
               </button>
@@ -470,7 +491,8 @@ const SimulacoesAnterioresAluno: React.FC = () => {
         backgroundAttachment: "fixed",
       }}
     >
-      <div className="hidden md:block fixed right-0 bottom-0 z-10">
+      {/* Imagem do Galileu - oculta em mobile */}
+      <div className="hidden lg:block fixed right-0 bottom-0 z-10">
         <Image
           src="/images/galileuimagem.png"
           alt="Galileu"
@@ -480,41 +502,35 @@ const SimulacoesAnterioresAluno: React.FC = () => {
         />
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        <header className="flex flex-col md:flex-row justify-between items-center mb-16">
-          <div className="mb-6 md:mb-0">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+        {/* Header responsivo */}
+        <header className="flex justify-between items-center mb-8 sm:mb-16 relative">
+          <div className="flex-shrink-0">
             <Image
               onClick={() => router.push("/dashboardaluno")}
               src="/images/markim-Photoroom.png"
               alt="Logo Projeto Galileu"
-              width={150}
-              height={50}
-              className="hover:scale-105 transition-transform duration-300 cursor-pointer"
+              width={120}
+              height={40}
+              className="hover:scale-105 transition-transform duration-300 cursor-pointer sm:w-[150px] sm:h-[150px]"
             />
           </div>
 
-          <nav>
-            <ul className="flex flex-wrap justify-center gap-6">
+          {/* Menu Desktop */}
+          <nav className="hidden md:block">
+            <ul className="flex gap-4 lg:gap-6">
               <li>
                 <button
                   onClick={() => router.push("/dashboardaluno")}
-                  className="text-white hover:text-purple-300 px-6 py-3 rounded-md transition duration-300"
+                  className="text-white hover:text-purple-300 px-4 lg:px-6 py-2 lg:py-3 rounded-md transition duration-300 text-sm lg:text-base"
                 >
                   Início
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => router.push("/quemsomosaluno")}
-                  className="text-white hover:text-purple-300 px-6 py-3 rounded-md transition duration-300"
-                >
-                  Quem Somos
-                </button>
-              </li>
-              <li>
-                <button
                   onClick={() => router.push("/simulacoesaluno")}
-                  className="text-white px-6 py-3 rounded-md font-bold border border-purple-400"
+                  className="text-white px-4 lg:px-6 py-2 lg:py-3 rounded-md font-bold border border-purple-400 text-sm lg:text-base"
                 >
                   Simulações
                 </button>
@@ -522,84 +538,150 @@ const SimulacoesAnterioresAluno: React.FC = () => {
               <li>
                 <button
                   onClick={() => router.push("/editarperfilaluno")}
-                  className="bg-purple-600 text-white px-8 py-3 rounded-md font-bold transition duration-300"
+                  className="bg-purple-600 text-white px-4 lg:px-8 py-2 lg:py-3 rounded-md font-bold transition duration-300 text-sm lg:text-base"
                 >
                   {userName}
                 </button>
               </li>
             </ul>
           </nav>
+
+          {/* Container do Menu Mobile */}
+          <div className="menu-mobile-container relative md:hidden">
+            {/* Botão Menu Mobile */}
+            <button
+              onClick={toggleMenuMobile}
+              className="text-white p-2 rounded-md border border-purple-400 hover:bg-purple-600 transition duration-300"
+              aria-label="Menu"
+            >
+              <MenuIcon />
+            </button>
+
+            {/* Menu Mobile */}
+            {menuMobileAberto && (
+              <div className="absolute top-full right-0 mt-2 w-48 bg-purple-900 bg-opacity-95 backdrop-blur-sm border border-purple-400 rounded-lg shadow-lg z-50">
+                <ul className="py-2">
+                  <li>
+                    <button
+                      onClick={() => {
+                        router.push("/dashboardaluno");
+                        setMenuMobileAberto(false);
+                      }}
+                      className="w-full text-left text-white px-4 py-3 hover:bg-purple-700 transition duration-300"
+                    >
+                      Início
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => {
+                        router.push("/simulacoesaluno");
+                        setMenuMobileAberto(false);
+                      }}
+                      className="w-full text-left text-white px-4 py-3 hover:bg-purple-700 transition duration-300 font-bold"
+                    >
+                      Simulações
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => {
+                        router.push("/editarperfilaluno");
+                        setMenuMobileAberto(false);
+                      }}
+                      className="w-full text-left text-white px-4 py-3 hover:bg-purple-700 transition duration-300"
+                    >
+                      {userName}
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
         </header>
 
-        <main className="flex flex-col items-center text-center py-16">
-          <div className="bg-purple-800 text-white px-8 py-6 rounded-lg shadow-lg mb-8 flex items-center gap-4">
+        <main className="flex flex-col items-center text-center py-8 sm:py-16">
+          {/* Título com botão de voltar */}
+          <div className="bg-purple-800 text-white px-4 sm:px-8 py-4 sm:py-6 rounded-lg shadow-lg mb-6 sm:mb-8 flex items-center gap-2 sm:gap-4 w-full max-w-4xl">
             <button
               onClick={() => router.push("/simulacoesaluno")}
-              className="text-white hover:text-gray-300"
+              className="text-white hover:text-gray-300 flex-shrink-0"
             >
               <ArrowBackIcon fontSize="large" />
             </button>
-            <h1 className="text-4xl font-bold">Simulações Anteriores</h1>
+            <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold truncate">Simulações Anteriores</h1>
           </div>
 
-          <div className="w-full max-w-4xl">
-            <div className="flex justify-between items-center mb-6">
+          <div className="w-full max-w-4xl px-2 sm:px-0">
+            {/* Controles de comparação */}
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-4 sm:mb-6 gap-4">
               {simulacoes.length >= 2 && (
                 <button
                   onClick={toggleModoComparacao}
-                  className={`flex items-center gap-2 px-6 py-3 rounded-md font-bold transition duration-300 ${
+                  className={`flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 rounded-md font-bold transition duration-300 text-sm sm:text-base ${
                     modoComparacao
                       ? "bg-purple-800 text-white"
                       : "bg-purple-200 text-purple-800"
                   }`}
                 >
                   <CompareArrowsIcon />
-                  {modoComparacao ? "Cancelar Comparação" : "Comparar Simulações"}
+                  <span className="hidden sm:inline">
+                    {modoComparacao ? "Cancelar Comparação" : "Comparar Simulações"}
+                  </span>
+                  <span className="sm:hidden">
+                    {modoComparacao ? "Cancelar" : "Comparar"}
+                  </span>
                 </button>
               )}
               
               {modoComparacao && (
-                <div className="text-white bg-purple-950 py-2 px-3 border border-purple-300 rounded-lg shadow-lg">
-                  {simulacoesSelecionadas.length === 0 && "Selecione duas simulações para comparar"}
+                <div className="text-white bg-purple-950 py-2 px-3 border border-purple-300 rounded-lg shadow-lg text-xs sm:text-sm text-center">
+                  {simulacoesSelecionadas.length === 0 && (
+                    <span className="hidden sm:inline">Selecione duas simulações para comparar</span>
+                  )}
+                  {simulacoesSelecionadas.length === 0 && (
+                    <span className="sm:hidden">Selecione duas simulações</span>
+                  )}
                   {simulacoesSelecionadas.length === 1 && "Selecione mais uma simulação"}
                   {simulacoesSelecionadas.length === 2 && "Duas simulações selecionadas"}
                 </div>
               )}
             </div>
 
-            <div className="bg-purple-200 bg-opacity-20 rounded-lg p-8">
+            {/* Lista de simulações */}
+            <div className="bg-purple-200 bg-opacity-20 rounded-lg p-4 sm:p-8">
               {simulacoes.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {simulacoes.map((simulacao) => (
                     <div
                       key={simulacao.id}
-                      className={`bg-white p-6 rounded-lg shadow-md hover:bg-purple-50 transition duration-300 cursor-pointer relative ${
+                      className={`bg-white p-4 sm:p-6 rounded-lg shadow-md hover:bg-purple-50 transition duration-300 cursor-pointer relative ${
                         modoComparacao && simulacoesSelecionadas.find(s => s.id === simulacao.id)
                           ? "border-4 border-purple-600"
                           : ""
                       }`}
                       onClick={() => abrirModal(simulacao)}
                     >
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h2 className="text-xl font-bold text-purple-800 mb-2">
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex-1 min-w-0">
+                          <h2 className="text-base sm:text-xl font-bold text-purple-800 mb-2 truncate">
                             Simulação em {formatarData(simulacao.timestamp)}
                           </h2>
-                          <p className="text-gray-700">Status: {simulacao.status}</p>
+                          <p className="text-gray-700 text-sm sm:text-base">Status: {simulacao.status}</p>
                         </div>
                         <button
                           onClick={(e) => confirmarExclusao(simulacao, e)}
-                          className="ml-4 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition duration-300"
+                          className="flex-shrink-0 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition duration-300"
                           title="Excluir simulação"
                         >
-                          <DeleteIcon />
+                          <DeleteIcon fontSize="small" />
                         </button>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-white text-lg">Nenhuma simulação encontrada.</p>
+                <p className="text-white text-base sm:text-lg">Nenhuma simulação encontrada.</p>
               )}
             </div>
           </div>
@@ -614,3 +696,4 @@ const SimulacoesAnterioresAluno: React.FC = () => {
 };
 
 export default SimulacoesAnterioresAluno;
+

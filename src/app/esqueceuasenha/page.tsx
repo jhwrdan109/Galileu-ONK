@@ -30,10 +30,11 @@ const EsqueceuSenha: React.FC = () => {
 
   return (
     <div
-      className="h-screen w-screen flex items-center justify-end bg-cover bg-center relative"
+      className="min-h-screen w-screen flex items-center justify-center bg-cover bg-center p-6 overflow-y-auto" // Alterado justify-end para justify-center
       style={{
         backgroundImage: "url('/images/FundoCanva.png')",
         backgroundSize: "cover",
+        backgroundAttachment: "fixed", // Adicionado para consistência
       }}
     >
       <ArrowBackIcon
@@ -42,12 +43,12 @@ const EsqueceuSenha: React.FC = () => {
         onClick={() => router.push("/login")}
       />
 
-      <div className="bg-purple-900 p-6 rounded-lg shadow-lg w-96 border-4 border-purple-300 relative mr-10">
-        <h2 className="text-white text-2xl font-bold mb-2">Esqueceu a senha?</h2>
-        <p className="text-white text-sm mb-4">Entre com o e-mail associado com sua conta.</p>
+      <div className="bg-purple-900 p-6 rounded-lg shadow-lg w-full max-w-md border-4 border-purple-300 relative mx-auto"> {/* Removido w-96 e mr-10, adicionado w-full max-w-md mx-auto */}
+        <h2 className="text-white text-2xl font-bold mb-2 text-center">Esqueceu a senha?</h2> {/* Centralizado o título */}
+        <p className="text-white text-sm mb-4 text-center">Entre com o e-mail associado com sua conta.</p> {/* Centralizado o parágrafo */}
 
-        {message && <p className="text-green-400 text-sm mb-2">{message}</p>}
-        {error && <p className="text-red-400 text-sm mb-2">{error}</p>}
+        {message && <p className="text-green-400 text-sm mb-2 text-center">{message}</p>} {/* Centralizado mensagens */}
+        {error && <p className="text-red-400 text-sm mb-2 text-center">{error}</p>} {/* Centralizado mensagens */}
 
         <form onSubmit={handleResetPassword}>
           <label className="text-gray-300 text-sm block mb-1">Email para recuperação</label>
@@ -72,16 +73,16 @@ const EsqueceuSenha: React.FC = () => {
           <Image
             src="/images/galileuimagem.png"
             alt="Galileu"
-            width={200} 
-            height={300}
-            className="object-contain"
+            width={200} // Mantido para o Next.js Image, mas será limitado por max-w-full
+            height={300} // Mantido para o Next.js Image, mas será limitado por h-auto
+            className="object-contain max-w-full h-auto" // Adicionado max-w-full h-auto para responsividade
           />
           <Image
             src="/images/markim-Photoroom.png"
             alt="Logo Projeto Galileu"
-            width={80}
-            height={80}
-            className="absolute bottom-28 right-11 transform scale-75"
+            width={80} // Mantido para o Next.js Image
+            height={80} // Mantido para o Next.js Image
+            className="absolute bottom-1/4 right-1/4 transform translate-x-1/2 translate-y-1/2 scale-75 object-contain" // Ajustado posicionamento para ser responsivo
           />
         </div>
       </div>

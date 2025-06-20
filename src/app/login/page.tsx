@@ -67,20 +67,21 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="h-screen w-screen flex items-center justify-start bg-cover bg-center fixed top-0 left-0"
+    <div className="min-h-screen w-screen flex flex-col items-center justify-center bg-cover bg-center p-4" // Adicionado p-4 para padding em telas pequenas
       style={{ backgroundImage: "url('/images/FundoCanva.png')", backgroundSize: "cover", backgroundAttachment: "fixed" }}>
 
       <ArrowBackIcon className="absolute top-4 left-4 text-white cursor-pointer hover:scale-110 transition"
         fontSize="large" onClick={() => router.push("/")} />
 
-      <div className="p-6 rounded-lg shadow-lg max-w-xs w-full absolute top-1/2 left-10 transform -translate-y-1/2 backdrop-blur-lg bg-transparent">
+      <div className="p-6 rounded-lg shadow-lg w-full max-w-xs sm:max-w-sm md:max-w-md backdrop-blur-lg bg-transparent "> {/* Ajuste de max-w e remoção de posicionamento absoluto */}
         <div className="flex justify-center mb-4">
-          <Image src="/images/markim-Photoroom.png" alt="Logo Projeto Galileu" width={120} height={40}
-            className="hover:scale-105 transition-transform duration-300" />
+          <Image src="/images/markim-Photoroom.png" alt="Logo Projeto Galileu"
+            width={120} height={40} // Mantido para proporção, mas a classe controlará o tamanho
+            className="w-24 sm:w-32 hover:scale-105 transition-transform duration-300" /> {/* Ajuste de largura responsivo */}
         </div>
-        <h2 className="text-white text-xl font-bold text-center">Login</h2>
+        <h2 className="text-white text-xl sm:text-2xl font-bold text-center mb-4">Login</h2> {/* Ajuste de tamanho de fonte e margem */}
 
-        {error && <p className="text-red-400 text-center mb-3">{error}</p>}
+        {error && <p className="text-red-400 text-center mb-3 text-sm">{error}</p>} {/* Ajuste de tamanho de fonte */}
 
         <form onSubmit={handleLogin}>
           <div className="mb-3">

@@ -19,9 +19,21 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+// Ícone do hambúrguer
+const HamburgerIcon = () => (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+  </svg>
+);
+
+// Ícone de fechar
+const CloseIcon = () => (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
 
 const ExplicacaoGalileu: React.FC<{
-  
   angulo: number | null;
   forcaPeso: number | null;
   forcaNormal: number | null;
@@ -47,7 +59,6 @@ const ExplicacaoGalileu: React.FC<{
   tempo
 }) => {
   const [explicando, setExplicando] = useState(false);
-
   const [textoAtual, setTextoAtual] = useState("");
   const [indiceExplicacao, setIndiceExplicacao] = useState(0);
   const [tooltipVisivel, setTooltipVisivel] = useState<string | null>(null);
@@ -166,125 +177,125 @@ const ExplicacaoGalileu: React.FC<{
     if (!explicacao) return null;
     
     return (
-      <div className="absolute z-10 bg-gray-900 text-white p-4 rounded-lg shadow-lg max-w-xs transform -translate-y-full -translate-x-1/4 mb-2 opacity-90">
-        <h4 className="font-bold text-sm mb-1">{explicacao.titulo}</h4>
-        <p className="text-xs">{explicacao.texto}</p>
+      <div className="absolute z-10 bg-gray-900 text-white p-3 rounded-lg shadow-lg max-w-xs transform -translate-y-full -translate-x-1/4 mb-2 opacity-90 text-xs sm:text-sm">
+        <h4 className="font-bold mb-1">{explicacao.titulo}</h4>
+        <p>{explicacao.texto}</p>
         <div className="absolute w-3 h-3 bg-gray-900 transform rotate-45 left-1/4 bottom-0 translate-y-1/2"></div>
       </div>
     );
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md mt-8 mb-5">
-      <h3 className="text-lg font-bold mb-4 text-black">Explicação dos Valores</h3>
-      <div className="flex flex-col md:flex-row">
-        <div className="md:w-1/3 flex flex-col items-center justify-center p-4">
+    <div className="bg-white p-3 sm:p-4 md:p-6 rounded-lg shadow-md mt-6 sm:mt-8 mb-4 sm:mb-5 mx-2 sm:mx-0">
+      <h3 className="text-base sm:text-lg md:text-xl font-bold mb-3 sm:mb-4 text-black">Explicação dos Valores</h3>
+      <div className="flex flex-col lg:flex-row">
+        <div className="lg:w-1/3 flex flex-col items-center justify-center p-2 sm:p-4 mb-4 lg:mb-0">
           <img 
             src="/images/galileumexendo.gif" 
             alt="Galileu explicando" 
-            className="w-48 h-48 rounded-full mb-4"
+            className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-full mb-3 sm:mb-4"
           />
           <button
             onClick={iniciarExplicacao}
             disabled={explicando}
-            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-500 transition duration-300 disabled:bg-gray-400"
+            className="bg-purple-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-purple-500 transition duration-300 disabled:bg-gray-400 text-sm sm:text-base w-full sm:w-auto"
           >
             {explicando ? "Explicando..." : "Peça ao Galileu explicar"}
           </button>
         </div>
-        <div className="md:w-2/3 space-y-4 text-black p-4">
+        <div className="lg:w-2/3 space-y-3 sm:space-y-4 text-black p-2 sm:p-4">
           {explicando ? (
-            <div className="border-l-4 border-purple-600 pl-4 py-2 min-h-32 flex items-center">
-              <p className="text-lg">{textoAtual}</p>
+            <div className="border-l-4 border-purple-600 pl-3 sm:pl-4 py-2 min-h-24 sm:min-h-32 flex items-center">
+              <p className="text-sm sm:text-base md:text-lg">{textoAtual}</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div 
                 onMouseEnter={() => mostrarTooltip("velocidade")}
                 onMouseLeave={esconderTooltip}
-                className="border-l-4 border-green-600 pl-4 py-2 relative cursor-help"
+                className="border-l-4 border-green-600 pl-3 sm:pl-4 py-2 relative cursor-help"
               >
-                <p><strong className="text-green-600">Velocidade:</strong> {velocidade !== null ? `${velocidade.toFixed(2)} m/s` : "Carregando..."}</p>
+                <p className="text-sm sm:text-base"><strong className="text-green-600">Velocidade:</strong> {velocidade !== null ? `${velocidade.toFixed(2)} m/s` : "Carregando..."}</p>
                 {tooltipVisivel === "velocidade" && <TooltipComponent id="velocidade" />}
               </div>
               <div 
                 onMouseEnter={() => mostrarTooltip("px")}
                 onMouseLeave={esconderTooltip}
-                className="border-l-4 border-blue-600 pl-4 py-2 relative cursor-help"
+                className="border-l-4 border-blue-600 pl-3 sm:pl-4 py-2 relative cursor-help"
               >
-                <p><strong className="text-blue-600">Px:</strong> {px !== null ? `${px.toFixed(2)} N` : "Carregando..."}</p>
+                <p className="text-sm sm:text-base"><strong className="text-blue-600">Px:</strong> {px !== null ? `${px.toFixed(2)} N` : "Carregando..."}</p>
                 {tooltipVisivel === "px" && <TooltipComponent id="px" />}
               </div>
               <div 
                 onMouseEnter={() => mostrarTooltip("py")}
                 onMouseLeave={esconderTooltip}
-                className="border-l-4 border-indigo-600 pl-4 py-2 relative cursor-help"
+                className="border-l-4 border-indigo-600 pl-3 sm:pl-4 py-2 relative cursor-help"
               >
-                <p><strong className="text-indigo-600">Py:</strong> {py !== null ? `${py.toFixed(2)} N` : "Carregando..."}</p>
+                <p className="text-sm sm:text-base"><strong className="text-indigo-600">Py:</strong> {py !== null ? `${py.toFixed(2)} N` : "Carregando..."}</p>
                 {tooltipVisivel === "py" && <TooltipComponent id="py" />}
               </div>
               <div 
                 onMouseEnter={() => mostrarTooltip("forcaAtrito")}
                 onMouseLeave={esconderTooltip}
-                className="border-l-4 border-orange-500 pl-4 py-2 relative cursor-help"
+                className="border-l-4 border-orange-500 pl-3 sm:pl-4 py-2 relative cursor-help"
               >
-                <p><strong className="text-orange-500">Força de Atrito:</strong> {forcaAtrito !== null ? `${forcaAtrito.toFixed(2)} N` : "Carregando..."}</p>
+                <p className="text-sm sm:text-base"><strong className="text-orange-500">Força de Atrito:</strong> {forcaAtrito !== null ? `${forcaAtrito.toFixed(2)} N` : "Carregando..."}</p>
                 {tooltipVisivel === "forcaAtrito" && <TooltipComponent id="forcaAtrito" />}
               </div>
               <div 
                 onMouseEnter={() => mostrarTooltip("forcaPeso")}
                 onMouseLeave={esconderTooltip}
-                className="border-l-4 border-red-600 pl-4 py-2 relative cursor-help"
+                className="border-l-4 border-red-600 pl-3 sm:pl-4 py-2 relative cursor-help"
               >
-                <p><strong className="text-red-600">Força Peso:</strong> {forcaPeso !== null ? `${forcaPeso.toFixed(2)} N` : "Carregando..."}</p>
+                <p className="text-sm sm:text-base"><strong className="text-red-600">Força Peso:</strong> {forcaPeso !== null ? `${forcaPeso.toFixed(2)} N` : "Carregando..."}</p>
                 {tooltipVisivel === "forcaPeso" && <TooltipComponent id="forcaPeso" />}
               </div>
               <div 
                 onMouseEnter={() => mostrarTooltip("forcaResultante")}
                 onMouseLeave={esconderTooltip}
-                className="border-l-4 border-purple-600 pl-4 py-2 relative cursor-help"
+                className="border-l-4 border-purple-600 pl-3 sm:pl-4 py-2 relative cursor-help"
               >
-                <p><strong className="text-purple-600">Força Resultante:</strong> {forcaResultante !== null ? `${forcaResultante.toFixed(2)} N` : "Carregando..."}</p>
+                <p className="text-sm sm:text-base"><strong className="text-purple-600">Força Resultante:</strong> {forcaResultante !== null ? `${forcaResultante.toFixed(2)} N` : "Carregando..."}</p>
                 {tooltipVisivel === "forcaResultante" && <TooltipComponent id="forcaResultante" />}
               </div>
               <div 
                 onMouseEnter={() => mostrarTooltip("forcaNormal")}
                 onMouseLeave={esconderTooltip}
-                className="border-l-4 border-green-500 pl-4 py-2 relative cursor-help"
+                className="border-l-4 border-green-500 pl-3 sm:pl-4 py-2 relative cursor-help"
               >
-                <p><strong className="text-green-500">Força Normal:</strong> {forcaNormal !== null ? `${forcaNormal.toFixed(2)} N` : "Carregando..."}</p>
+                <p className="text-sm sm:text-base"><strong className="text-green-500">Força Normal:</strong> {forcaNormal !== null ? `${forcaNormal.toFixed(2)} N` : "Carregando..."}</p>
                 {tooltipVisivel === "forcaNormal" && <TooltipComponent id="forcaNormal" />}
               </div>
               <div 
                 onMouseEnter={() => mostrarTooltip("aceleracao")}
                 onMouseLeave={esconderTooltip}
-                className="border-l-4 border-pink-500 pl-4 py-2 relative cursor-help"
+                className="border-l-4 border-pink-500 pl-3 sm:pl-4 py-2 relative cursor-help"
               >
-                <p><strong className="text-pink-500">Aceleração:</strong> {aceleracao !== null ? `${aceleracao.toFixed(2)} m/s²` : "Carregando..."}</p>
+                <p className="text-sm sm:text-base"><strong className="text-pink-500">Aceleração:</strong> {aceleracao !== null ? `${aceleracao.toFixed(2)} m/s²` : "Carregando..."}</p>
                 {tooltipVisivel === "aceleracao" && <TooltipComponent id="aceleracao" />}
               </div>
               <div 
                 onMouseEnter={() => mostrarTooltip("distancia")}
                 onMouseLeave={esconderTooltip}
-                className="border-l-4 border-yellow-500 pl-4 py-2 relative cursor-help"
+                className="border-l-4 border-yellow-500 pl-3 sm:pl-4 py-2 relative cursor-help"
               >
-                <p><strong className="text-yellow-500">Distância:</strong> {distancia !== null ? `${distancia.toFixed(2)} cm` : "Carregando..."}</p>
+                <p className="text-sm sm:text-base"><strong className="text-yellow-500">Distância:</strong> {distancia !== null ? `${distancia.toFixed(2)} cm` : "Carregando..."}</p>
                 {tooltipVisivel === "distancia" && <TooltipComponent id="distancia" />}
               </div>
               <div 
                 onMouseEnter={() => mostrarTooltip("tempo")}
                 onMouseLeave={esconderTooltip}
-                className="border-l-4 border-cyan-500 pl-4 py-2 relative cursor-help"
+                className="border-l-4 border-cyan-500 pl-3 sm:pl-4 py-2 relative cursor-help"
               >
-                <p><strong className="text-cyan-500">Tempo:</strong> {tempo !== null ? `${tempo.toFixed(2)} s` : "Carregando..."}</p>
+                <p className="text-sm sm:text-base"><strong className="text-cyan-500">Tempo:</strong> {tempo !== null ? `${tempo.toFixed(2)} s` : "Carregando..."}</p>
                 {tooltipVisivel === "tempo" && <TooltipComponent id="tempo" />}
               </div>
               <div 
                 onMouseEnter={() => mostrarTooltip("angulo")}
                 onMouseLeave={esconderTooltip}
-                className="border-l-4 border-amber-500 pl-4 py-2 relative cursor-help"
+                className="border-l-4 border-amber-500 pl-3 sm:pl-4 py-2 relative cursor-help"
               >
-                <p><strong className="text-amber-500">Ângulo:</strong> {angulo !== null ? `${angulo.toFixed(2)}°` : "Carregando..."}</p>
+                <p className="text-sm sm:text-base"><strong className="text-amber-500">Ângulo:</strong> {angulo !== null ? `${angulo.toFixed(2)}°` : "Carregando..."}</p>
                 {tooltipVisivel === "angulo" && <TooltipComponent id="angulo" />}
               </div>
             </div>
@@ -298,6 +309,7 @@ const ExplicacaoGalileu: React.FC<{
 const AnaliseSimulacao: React.FC = () => {
   const router = useRouter();
   const [loadingData, setLoadingData] = useState(false);
+  const [menuAberto, setMenuAberto] = useState(false);
 
   const [userName, setUserName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -323,6 +335,16 @@ const AnaliseSimulacao: React.FC = () => {
 
   // Dados para o gráfico
   const [dadosGrafico, setDadosGrafico] = useState<Array<{angulo: number, aceleracao: number}>>([]);
+
+  // Função para alternar o menu
+  const alternarMenu = () => {
+    setMenuAberto(!menuAberto);
+  };
+
+  // Função para fechar o menu ao clicar em um item
+  const fecharMenu = () => {
+    setMenuAberto(false);
+  };
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -574,9 +596,9 @@ const AnaliseSimulacao: React.FC = () => {
     value: number | null;
     unit: string;
   }) => (
-    <div className="p-6 bg-white rounded-lg shadow-lg text-center">
-      <h4 className="text-xl font-semibold text-black">{title}</h4>
-      <p className="text-2xl font-bold text-black">
+    <div className="p-3 sm:p-4 md:p-6 bg-white rounded-lg shadow-lg text-center">
+      <h4 className="text-sm sm:text-lg md:text-xl font-semibold text-black mb-1 sm:mb-2">{title}</h4>
+      <p className="text-lg sm:text-xl md:text-2xl font-bold text-black truncate">
         {loadingData || value === null ? "Carregando..." : `${value.toFixed(2)} ${unit}`}
       </p>
     </div>
@@ -612,28 +634,31 @@ const AnaliseSimulacao: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-cover bg-center relative" style={{
-      backgroundImage: "url('/images/kokushibo.png')",
+      backgroundImage: "url(\'/images/kokushibo.png\')",
       backgroundSize: "cover",
       backgroundPosition: "center",
       backgroundAttachment: "fixed",
     }}>
       <GalieluExplicacaoInicio/>
-      <div className="container mx-auto px-4 py-8">
-        <header className="flex flex-col md:flex-row justify-between items-center mb-16">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+        {/* Header com navegação responsiva */}
+        <header className="flex justify-between items-center mb-8 sm:mb-16 relative">
           <Image
             onClick={() => router.push("/dashboardaluno")}
             src="/images/markim-Photoroom.png"
             alt="Logo Projeto Galileu"
-            width={150}
-            height={50}
-            className="hover:scale-105 transition-transform duration-300 cursor-pointer"
+            width={120}
+            height={40}
+            className="hover:scale-105 transition-transform duration-300 cursor-pointer sm:w-[150px] sm:h-[150px]"
           />
-          <nav>
-            <ul className="flex flex-wrap justify-center gap-6">
+          
+          {/* Menu Desktop */}
+          <nav className="hidden md:block">
+            <ul className="flex gap-4 lg:gap-6">
               <li>
                 <button
                   onClick={() => router.push("/dashboardaluno")}
-                  className="text-white px-6 py-3 rounded-md border border-purple-400 bg-transparent hover:text-purple-300 hover:border-purple-300 transition duration-300 shadow-md hover:shadow-lg"
+                  className="text-white px-4 lg:px-6 py-2 lg:py-3 rounded-md border border-purple-400 bg-transparent hover:text-purple-300 hover:border-purple-300 transition duration-300 shadow-md hover:shadow-lg text-sm lg:text-base"
                 >
                   Início
                 </button>
@@ -641,7 +666,7 @@ const AnaliseSimulacao: React.FC = () => {
               <li>
                 <button
                   onClick={() => router.push("/simulacoesaluno")}
-                  className="text-white px-6 py-3 rounded-md border border-purple-400 bg-transparent hover:text-purple-300 hover:border-purple-300 transition duration-300 shadow-md hover:shadow-lg"
+                  className="text-white px-4 lg:px-6 py-2 lg:py-3 rounded-md border border-purple-400 bg-transparent hover:text-purple-300 hover:border-purple-300 transition duration-300 shadow-md hover:shadow-lg text-sm lg:text-base"
                 >
                   Simulações
                 </button>
@@ -649,38 +674,90 @@ const AnaliseSimulacao: React.FC = () => {
               <li>
                 <button
                   onClick={() => router.push("/editarperfilaluno")}
-                  className="bg-purple-600 text-white px-8 py-3 rounded-md font-bold transition duration-300 shadow-lg hover:bg-purple-500 hover:shadow-xl"
+                  className="bg-purple-600 text-white px-4 lg:px-8 py-2 lg:py-3 rounded-md font-bold transition duration-300 shadow-lg hover:bg-purple-500 hover:shadow-xl text-sm lg:text-base"
                 >
                   {userName}
                 </button>
               </li>
             </ul>
           </nav>
+
+          {/* Botão Hambúrguer Mobile */}
+          <button
+            onClick={alternarMenu}
+            className="md:hidden text-white p-2 rounded-md border border-purple-400 hover:bg-purple-600 transition duration-300"
+            aria-label="Menu"
+          >
+            {menuAberto ? <CloseIcon /> : <HamburgerIcon />}
+          </button>
+
+          {/* Menu Mobile */}
+          {menuAberto && (
+            <div className="absolute top-full right-0 mt-2 w-48 bg-purple-900 bg-opacity-95 backdrop-blur-sm border border-purple-400 rounded-lg shadow-lg md:hidden z-50">
+              <ul className="py-2">
+                <li>
+                  <button
+                    onClick={() => {
+                      router.push("/dashboardaluno");
+                      fecharMenu();
+                    }}
+                    className="w-full text-left text-white px-4 py-3 hover:bg-purple-700 transition duration-300"
+                  >
+                    Início
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      router.push("/simulacoesaluno");
+                      fecharMenu();
+                    }}
+                    className="w-full text-left text-white px-4 py-3 hover:bg-purple-700 transition duration-300"
+                  >
+                    Simulações
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      router.push("/editarperfilaluno");
+                      fecharMenu();
+                    }}
+                    className="w-full text-left text-white px-4 py-3 hover:bg-purple-700 transition duration-300 font-bold"
+                  >
+                    {userName}
+                  </button>
+                </li>
+              </ul>
+            </div>
+          )}
         </header>
 
-        <div className="relative max-w-5xl mx-auto bg-purple-900 bg-opacity-60 border border-purple-300 p-8 rounded-xl mt-8">
-          <h2 className="text-2xl font-bold mb-6 text-white">Análise</h2>
+        <div className="relative max-w-6xl mx-auto bg-purple-900 bg-opacity-60 border border-purple-300 p-4 sm:p-6 md:p-8 rounded-xl mt-4 sm:mt-8">
+          <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-white">Análise</h2>
 
           {!simulationStarted ? (
-            <div className="flex justify-center space-x-4">
+            <div className="flex justify-center">
               <button
                 onClick={iniciarSimulacao}
-                className="bg-purple-700 text-white px-8 py-4 rounded-lg font-bold hover:bg-purple-600 transition duration-300 shadow-lg"
+                className="bg-purple-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold hover:bg-purple-600 transition duration-300 shadow-lg text-sm sm:text-base"
               >
                 Iniciar Simulação
               </button>
             </div>
           ) : (
             <>
-              <div className="flex justify-center space-x-4 mb-10">
+              <div className="flex justify-center mb-6 sm:mb-10">
                 <button
                   onClick={finalizarSimulacao}
-                  className="bg-red-600 text-white px-8 py-4 rounded-lg font-bold hover:bg-red-500 transition duration-300 shadow-lg"
+                  className="bg-red-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold hover:bg-red-500 transition duration-300 shadow-lg text-sm sm:text-base"
                 >
                   Fim da Simulação
                 </button>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-black mb-14">
+              
+              {/* Grid de cards responsivo */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2 sm:gap-4 md:gap-6 text-black mb-8 sm:mb-14">
                 <InfoCard title="Distância" value={distancia} unit="cm" />
                 <InfoCard title="Ângulo" value={angulo} unit="°" />
                 <InfoCard title="Velocidade" value={velocidade} unit="m/s" />
@@ -694,22 +771,24 @@ const AnaliseSimulacao: React.FC = () => {
                 <InfoCard title="Força Resultante" value={forcaResultante} unit="N" />
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-lg mb-12">
-                <h3 className="text-xl font-semibold text-black mb-4">Representação das Forças</h3>
-                <div className="flex justify-center items-center h-96">
-                <ForcasSVG
-  forcaPeso={forcaPeso !== null ? forcaPeso : 0}
-  forcaNormal={forcaNormal !== null ? forcaNormal : 0}
-  forcaAtrito={forcaAtrito !== null ? forcaAtrito : 0}
-  px={px !== null ? px : 0}
-  py={py !== null ? py : 0}
-  forcaResultante={forcaResultante !== null ? forcaResultante : 0}
-  anguloInicial={30}
-  angulo={angulo !== null ? angulo : 30}  // Changed from 'anguloFirebase' to 'angulo'
-/>
+              {/* Representação das Forças */}
+              <div className="bg-white p-3 sm:p-4 md:p-6 rounded-lg shadow-lg mb-6 sm:mb-12">
+                <h3 className="text-lg sm:text-xl font-semibold text-black mb-3 sm:mb-4">Representação das Forças</h3>
+                <div className="flex justify-center items-center h-64 sm:h-80 md:h-96 overflow-x-auto">
+                  <ForcasSVG
+                    forcaPeso={forcaPeso !== null ? forcaPeso : 0}
+                    forcaNormal={forcaNormal !== null ? forcaNormal : 0}
+                    forcaAtrito={forcaAtrito !== null ? forcaAtrito : 0}
+                    px={px !== null ? px : 0}
+                    py={py !== null ? py : 0}
+                    forcaResultante={forcaResultante !== null ? forcaResultante : 0}
+                    anguloInicial={30}
+                    angulo={angulo !== null ? angulo : 30}
+                  />
                 </div>
               </div>
 
+              {/* Componente de Explicação */}
               <ExplicacaoGalileu
                 angulo={angulo}
                 forcaPeso={forcaPeso}
@@ -724,40 +803,43 @@ const AnaliseSimulacao: React.FC = () => {
                 tempo={tempo}
               />
               
-              <div className="bg-white p-6 rounded-lg shadow-lg">
-                <h3 className="text-xl font-semibold text-black mb-4">
+              {/* Gráfico */}
+              <div className="bg-white p-3 sm:p-4 md:p-6 rounded-lg shadow-lg">
+                <h3 className="text-lg sm:text-xl font-semibold text-black mb-3 sm:mb-4">
                   Gráfico: Aceleração vs Ângulo
                 </h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart 
-                    data={dadosGrafico.length > 0 ? dadosGrafico : Array.from({length: 91}, (_, i) => ({angulo: i, aceleracao: 0}))}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 20 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="angulo" 
-                      label={{ value: "Ângulo (°)", position: "insideBottomRight", offset: 0 }}
-                      domain={[0, 90]}
-                      ticks={[0, 15, 30, 45, 60, 75, 90]}
-                    />
-                    <YAxis 
-                      label={{ value: "Aceleração (m/s²)", angle: -90, position: "insideLeft" }}
-                      domain={[0, 10]}
-                    />
-                    <Tooltip 
-                      formatter={(value) => [`${value} m/s²`, "Aceleração"]}
-                      labelFormatter={(label) => `Ângulo: ${label}°`}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="aceleracao"
-                      stroke="#7c3aed"
-                      strokeWidth={2}
-                      dot={{ r: 2 }}
-                      activeDot={{ r: 6 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                <div className="w-full overflow-x-auto">
+                  <ResponsiveContainer width="100%" height={250} minWidth={300}>
+                    <LineChart 
+                      data={dadosGrafico.length > 0 ? dadosGrafico : Array.from({length: 91}, (_, i) => ({angulo: i, aceleracao: 0}))}
+                      margin={{ top: 5, right: 30, left: 20, bottom: 20 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="angulo" 
+                        label={{ value: "Ângulo (°)", position: "insideBottomRight", offset: 0 }}
+                        domain={[0, 90]}
+                        ticks={[0, 15, 30, 45, 60, 75, 90]}
+                      />
+                      <YAxis 
+                        label={{ value: "Aceleração (m/s²)", angle: -90, position: "insideLeft" }}
+                        domain={[0, 10]}
+                      />
+                      <Tooltip 
+                        formatter={(value) => [`${value} m/s²`, "Aceleração"]}
+                        labelFormatter={(label) => `Ângulo: ${label}°`}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="aceleracao"
+                        stroke="#7c3aed"
+                        strokeWidth={2}
+                        dot={{ r: 2 }}
+                        activeDot={{ r: 6 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </>
           )}
@@ -768,3 +850,4 @@ const AnaliseSimulacao: React.FC = () => {
 };
 
 export default AnaliseSimulacao;
+

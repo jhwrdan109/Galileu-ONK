@@ -7,22 +7,22 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { database } from '../../../lib/firebaseConfig';
 import { ref, set } from 'firebase/database';
-import { ArrowLeft, Paperclip } from 'lucide-react';
-import { Clock, XCircle } from 'lucide-react';
+import { ArrowLeft, Paperclip } from 'lucide-react'; // Removido Menu, XCircle já estava
+import { Clock, XCircle } from 'lucide-react'; // XCircle já estava
 
 const CriarQuestao = () => {
   const [enunciado, setEnunciado] = useState('');
-  const [incognita, setIncognita] = useState('');
+
   const [resolucao, setResolucao] = useState('');
   const [alternativas, setAlternativas] = useState('');
   const [alternativasVisualizacao, setAlternativasVisualizacao] = useState(['', '', '', '', '']);
   const [tempoMinutos, setTempoMinutos] = useState(0);
   const [tempoSegundos, setTempoSegundos] = useState(0);
-const [anexo, setAnexo] = useState<File | null>(null);
+  const [anexo, setAnexo] = useState<File | null>(null);
 
   const [userId, setUserId] = useState(null);
   const [userName, setUserName] = useState('');
-const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [mostrarModalTempo, setMostrarModalTempo] = useState(false);
@@ -31,10 +31,12 @@ const [imageUrl, setImageUrl] = useState<string | null>(null);
     enunciado: '',
     resolucao: '',
     alternativas: '',
-    incognita: '',
     alternativaCorreta: '',
   });
   const router = useRouter();
+
+  // Estado para controlar a visibilidade do menu mobile
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -53,11 +55,11 @@ const [imageUrl, setImageUrl] = useState<string | null>(null);
     if (alternativas) {
       const alts = alternativas.split(',').map(alt => alt.trim());
       const novasAlternativas = [...alternativasVisualizacao];
-      
+
       for (let i = 0; i < Math.min(alts.length, 5); i++) {
         novasAlternativas[i] = alts[i];
       }
-      
+
       setAlternativasVisualizacao(novasAlternativas);
     }
   }, []); // Executa apenas na montagem
@@ -67,7 +69,7 @@ const [imageUrl, setImageUrl] = useState<string | null>(null);
     const novasAlternativas = [...alternativasVisualizacao];
     novasAlternativas[index] = valor;
     setAlternativasVisualizacao(novasAlternativas);
-    
+
     // Converte o array de visualização para a string de alternativas
     setAlternativas(novasAlternativas.join(', '));
   };
@@ -77,18 +79,18 @@ const [imageUrl, setImageUrl] = useState<string | null>(null);
   }
 
   const handleAnexoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (file) {
-    setAnexo(file);
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === 'string') {
-        setImageUrl(reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
-  }
-};
+    const file = e.target.files?.[0];
+    if (file) {
+      setAnexo(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setImageUrl(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   const handleRemoveImage = () => {
     setAnexo(null);
     setImageUrl(null);
@@ -104,7 +106,6 @@ const [imageUrl, setImageUrl] = useState<string | null>(null);
       enunciado: !enunciado.trim() ? 'O enunciado é obrigatório.' : '',
       resolucao: !resolucao.trim() ? 'A resolução é obrigatória.' : '',
       alternativas: !todasAlternativasPreenchidas ? 'Todas as alternativas são obrigatórias.' : '',
-      incognita: !incognita ? 'A incógnita é obrigatória.' : '',
       alternativaCorreta: !alternativaCorreta ? 'A alternativa correta é obrigatória.' : '',
     };
     setErros(novosErros);
@@ -124,27 +125,34 @@ const [imageUrl, setImageUrl] = useState<string | null>(null);
           .from('arquivos')
           .upload(filePath, anexo);
 
-        if (error) return;
+        if (error) {
+          console.error("Erro ao fazer upload do anexo:", error);
+          alert('Erro ao fazer upload do anexo.');
+          return;
+        }
 
         const { data: publicUrlData } = supabase.storage
           .from('arquivos')
           .getPublicUrl(data.path);
 
         anexoUrl = publicUrlData?.publicUrl || null;
-      } catch {
+      } catch (uploadError) {
+        console.error("Erro inesperado no upload:", uploadError);
+        alert('Erro inesperado ao fazer upload do anexo.');
         return;
       }
     }
 
     const letras = ['A', 'B', 'C', 'D', 'E'];
-const alternativasObj: { [key: string]: string } = {};
+    const alternativasObj: { [key: string]: string } = {};
 
     const alternativasArray = alternativas.split(',').map((alt) => alt.trim());
     for (let i = 0; i < letras.length; i++) {
       alternativasObj[letras[i]] = alternativasArray[i] || '';
     }
 
-    const chaveQuestao = enunciado.trim().substring(0, 20).replace(/\s+/g, '_');
+    // Gerar uma chave única para a questão, usando um timestamp para garantir unicidade
+    const chaveQuestao = `${Date.now()}-${enunciado.trim().substring(0, 20).replace(/\s+/g, '_')}`;
 
     const novaQuestao = {
       enunciado,
@@ -175,9 +183,15 @@ const alternativasObj: { [key: string]: string } = {};
 
       // Redireciona para a página de escolha após salvar
       router.push("/escolhacriadasoucriarprof");
-    } catch {
+    } catch (dbError) {
+      console.error("Erro ao salvar a questão no Firebase:", dbError);
       alert('Erro ao salvar a questão.');
     }
+  };
+
+  const handleNavigation = (path: string) => {
+    router.push(path);
+    setMobileMenuOpen(false); // Fecha o menu ao navegar
   };
 
   return (
@@ -200,56 +214,128 @@ const alternativasObj: { [key: string]: string } = {};
           className="object-contain"
         />
       </div>
-      <div className="container mx-auto px-4 py-8">
-        <header className="flex flex-col md:flex-row justify-between items-center mb-16">
-          <div className="mb-6 md:mb-0">
+      <div className="container mx-auto px-4 py-4 sm:py-8"> {/* Ajustado padding */}
+        <header className="flex justify-between items-center mb-8 sm:mb-16"> {/* Ajustado margin-bottom */}
+          <div className="relative w-[140px] h-[140px] sm:w-[150px] sm:h-[150px]"> {/* Logo com tamanho responsivo */}
             <Image
+              onClick={() => handleNavigation("/dashboardprof")} // Usar handleNavigation
               src="/images/markim-Photoroom.png"
               alt="Logo Projeto Galileu"
-              width={150}
-              height={50}
-              className="hover:scale-105 transition-transform duration-300"
+              fill
+              className="cursor-pointer hover:scale-105 transition-transform duration-300 object-contain"
             />
           </div>
-          <nav>
-            <ul className="flex flex-wrap justify-center gap-6">
+
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:block"> {/* Esconde em telas pequenas */}
+            <ul className="flex gap-4 xl:gap-6"> {/* Ajustado gap */}
               <li>
                 <button
-                  onClick={() => router.push('/dashboardprof')}
-                  className="text-white hover:text-purple-300 px-6 py-3 rounded-md transition duration-300"
+                  onClick={() => handleNavigation('/dashboardprof')}
+                  className="text-white px-4 py-2 xl:px-6 xl:py-3 rounded-md border border-purple-400 bg-transparent hover:text-purple-300 hover:border-purple-300 transition duration-300 shadow-md hover:shadow-lg text-sm xl:text-base"
                 >
                   Início
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => router.push('/quemsomosprof')}
-                  className="text-white hover:text-purple-300 px-6 py-3 rounded-md transition duration-300"
+                  onClick={() => handleNavigation('/quemsomosprof')}
+                  className="text-white px-4 py-2 xl:px-6 xl:py-3 rounded-md border border-purple-400 bg-transparent hover:text-purple-300 hover:border-purple-300 transition duration-300 shadow-md hover:shadow-lg text-sm xl:text-base"
                 >
                   Quem Somos
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => router.push('/simuproftestesupabase')}
-                  className="text-white px-6 py-3 rounded-md font-bold border border-purple-400"
+                  onClick={() => handleNavigation('/simuproftestesupabase')}
+                  className="text-white px-4 py-2 xl:px-6 xl:py-3 rounded-md border border-purple-400 bg-transparent hover:text-purple-300 hover:border-purple-300 transition duration-300 shadow-md hover:shadow-lg text-sm xl:text-base"
                 >
                   Simulações
                 </button>
               </li>
               <li>
                 <button
-                  onClick={() => router.push('/editarperfilprof')}
-                  className="bg-purple-600 text-white px-8 py-3 rounded-md font-bold transition duration-300"
+                  onClick={() => handleNavigation('/editarperfilprof')}
+                  className="bg-purple-600 text-white px-4 py-2 xl:px-8 xl:py-3 rounded-md font-bold transition duration-300 shadow-lg hover:bg-purple-500 hover:shadow-xl text-sm xl:text-base truncate max-w-[120px] xl:max-w-none"
                 >
                   {userName}
                 </button>
               </li>
             </ul>
           </nav>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="lg:hidden text-white p-2" // Visível apenas em telas pequenas
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {mobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </header>
-        <div className="flex items-center justify-center h-full">
-          <div className="bg-purple-950 ml-40 p-4 rounded-lg shadow-lg border border-purple-300 max-w-7xl w-full text-center relative">
+
+        {/* Mobile Menu Overlay */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setMobileMenuOpen(false)}>
+            <div className="fixed top-0 right-0 h-full w-64 bg-purple-900 shadow-lg z-50 p-6" onClick={(e) => e.stopPropagation()}> {/* Impede que o clique no painel feche o menu */}
+              <div className="flex justify-between items-center mb-8">
+                <h3 className="text-white text-lg font-bold">Menu</h3>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-white p-2"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <nav>
+                <ul className="space-y-4">
+                  <li>
+                    <button
+                      className="text-white w-full text-left px-4 py-3 rounded-md border border-purple-400 bg-transparent hover:text-purple-300 hover:border-purple-300 transition duration-300"
+                      onClick={() => handleNavigation("/dashboardprof")}
+                    >
+                      Início
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => handleNavigation("/quemsomosprof")}
+                      className="text-white w-full text-left px-4 py-3 rounded-md border border-purple-400 bg-transparent hover:text-purple-300 hover:border-purple-300 transition duration-300"
+                    >
+                      Quem Somos
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => handleNavigation("/simuproftestesupabase")}
+                      className="text-white w-full text-left px-4 py-3 rounded-md border border-purple-400 bg-transparent hover:text-purple-300 hover:border-purple-300 transition duration-300"
+                    >
+                      Simulações
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => handleNavigation("/editarperfilprof")}
+                      className="bg-purple-600 text-white w-full text-left px-4 py-3 rounded-md font-bold transition duration-300 shadow-lg hover:bg-purple-500 hover:shadow-xl"
+                    >
+                      {userName}
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center justify-center h-full lg:pl-[200px]"> {/* Alterado md:pl-[200px] para lg:pl-[200px] */}
+          <div className="bg-purple-950 p-4 rounded-lg shadow-lg border border-purple-300 max-w-7xl w-full text-center relative mx-auto">
             <button
               onClick={() => router.push("/escolhacriadasoucriarprof")}
               className="absolute top-4 left-4 text-white hover:text-purple-300 transition duration-300"
@@ -277,7 +363,7 @@ const alternativasObj: { [key: string]: string } = {};
                 />
                 {erros.resolucao && <p className="text-red-500 text-sm">{erros.resolucao}</p>}
               </div>
-              
+
               {/* Interface melhorada para as alternativas */}
               <div className="mb-4">
                 <label className="block text-lg font-semibold text-white">Alternativas (A até E):</label>
@@ -294,11 +380,8 @@ const alternativasObj: { [key: string]: string } = {};
                 ))}
                 {erros.alternativas && <p className="text-red-500 text-sm">{erros.alternativas}</p>}
               </div>
-              
-              <div className="mb-4">
-              
-                {erros.incognita && <p className="text-red-500 text-sm">{erros.incognita}</p>}
-              </div>
+
+
               <div className="mb-4">
                 <label className="block mb-2 text-white">Alternativa Correta</label>
                 <select
@@ -326,11 +409,11 @@ const alternativasObj: { [key: string]: string } = {};
                   Definir Tempo
                 </button>
                 {mostrarModalTempo && (
-                  <div className="modal bg-black bg-opacity-50 fixed top-0 left-0 w-full h-full flex items-center justify-center">
+                  <div className="modal bg-black bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center"> {/* Usado inset-0 para cobrir toda a tela */}
                     <div className="bg-purple-900 border border-purple-200 p-8 rounded-md">
                       <h3 className="text-xl font-bold mb-4">Tempo</h3>
-                      <div className="flex items-center mb-4">
-                        <div className="flex items-center mr-4">
+                      <div className="flex flex-col sm:flex-row items-center mb-4"> {/* Flex-col para telas pequenas, flex-row para sm+ */}
+                        <div className="flex items-center mb-2 sm:mb-0 sm:mr-4">
                           <label htmlFor="minutos" className="text-white mr-2">Minutos</label>
                           <input
                             id="minutos"
@@ -342,8 +425,8 @@ const alternativasObj: { [key: string]: string } = {};
                             className="p-2 border rounded text-black w-20"
                           />
                         </div>
-                        <span className="text-white">:</span>
-                        <div className="flex items-center ml-4">
+                        <span className="text-white hidden sm:block">:</span> {/* Esconde o ":" em telas muito pequenas */}
+                        <div className="flex items-center mt-2 sm:mt-0 sm:ml-4">
                           <label htmlFor="segundos" className="text-white mr-2">Segundos</label>
                           <input
                             id="segundos"
@@ -357,14 +440,16 @@ const alternativasObj: { [key: string]: string } = {};
                           />
                         </div>
                       </div>
-                      <div className="mt-4">
+                      <div className="mt-4 flex justify-end"> {/* Botões alinhados à direita */}
                         <button
+                          type="button"
                           className="bg-red-500 text-white py-2 px-4 rounded-md mr-2"
                           onClick={() => setMostrarModalTempo(false)}
                         >
                           Cancelar
                         </button>
                         <button
+                          type="button"
                           className="bg-green-500 text-white py-2 px-4 rounded-md"
                           onClick={() => setMostrarModalTempo(false)}
                         >
@@ -380,21 +465,21 @@ const alternativasObj: { [key: string]: string } = {};
                 <input
                   type="file"
                   accept="image/*"
-                  className="p-2 border rounded"
+                  className="p-2 border rounded w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100" // Estilização para o input file
                   onChange={handleAnexoChange}
                 />
                 {imageUrl && (
-                  <div className="mt-4 relative">
+                  <div className="mt-4 relative w-fit mx-auto"> {/* Centraliza a imagem anexa */}
                     <Image
                       src={imageUrl}
                       alt="Imagem anexa"
                       width={200}
                       height={200}
-                      className="object-contain"
+                      className="object-contain border border-purple-400 rounded-md"
                     />
                     <button
                       type="button"
-                      className="absolute top-0 right-0 text-red-500"
+                      className="absolute -top-2 -right-2 text-red-500 bg-white rounded-full p-1" // Botão de remover mais visível
                       onClick={handleRemoveImage}
                     >
                       <XCircle size={24} />
@@ -406,7 +491,7 @@ const alternativasObj: { [key: string]: string } = {};
               <div className="mt-4">
                 <button
                   type="button"
-                  className="bg-green-500 text-white px-6 py-3 rounded-md"
+                  className="bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600 transition duration-300"
                   onClick={handleSalvarQuestao}
                 >
                   Salvar Questão

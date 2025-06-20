@@ -79,7 +79,7 @@ const Cadastro: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen w-screen flex items-center justify-start bg-cover bg-center p-6 overflow-y-auto"
+      className="min-h-screen w-screen flex items-center justify-center bg-cover bg-center p-6 overflow-y-auto" // Alterado justify-start para justify-center
       style={{
         backgroundImage: "url('/images/FundoCanva.png')",
         backgroundSize: "cover",
@@ -93,7 +93,7 @@ const Cadastro: React.FC = () => {
         onClick={() => router.push("/")}
       />
 
-      <div className="p-6 rounded-lg shadow-xl w-full max-w-md ml-10"> {/* 🔹 Formulário deslocado para a esquerda */}
+      <div className="p-6 rounded-lg shadow-xl w-full max-w-md mx-auto"> {/* Alterado ml-10 para mx-auto */}
         <div className="flex justify-center mb-3">
           <Image
             src="/images/markim-Photoroom.png"

@@ -15,6 +15,7 @@ import PasswordIcon from "@mui/icons-material/Password";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonIcon from "@mui/icons-material/Person";
+import MenuIcon from "@mui/icons-material/Menu";
 
 const Editarperfilprof: React.FC = () => {
   const router = useRouter();
@@ -31,6 +32,7 @@ const Editarperfilprof: React.FC = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [menuMobileAberto, setMenuMobileAberto] = useState(false);
 
   useEffect(() => {
     // Escutar mudanças de autenticação do Firebase
@@ -72,6 +74,25 @@ const Editarperfilprof: React.FC = () => {
     // Cleanup
     return () => unsubscribe();
   }, [router]);
+
+  // Função para fechar o menu mobile ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (menuMobileAberto && !target.closest('.menu-mobile-container')) {
+        setMenuMobileAberto(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuMobileAberto]);
+
+  const toggleMenuMobile = () => {
+    setMenuMobileAberto(!menuMobileAberto);
+  };
 
   const loadProfileImage = async (userId: string) => {
     try {
@@ -200,9 +221,17 @@ const Editarperfilprof: React.FC = () => {
     router.push("/login");
   };
 
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center text-white text-xl">
+        Carregando...
+      </div>
+    );
+  }
+
   return (
     <div
-      className="min-h-screen flex flex-col items-center text-white p-8 bg-cover bg-center relative"
+      className="min-h-screen flex flex-col items-center text-white p-2 sm:p-4 md:p-8 bg-cover bg-center relative"
       style={{
         backgroundImage: "url('/images/sooroxo.png')",
         backgroundSize: "cover",
@@ -210,33 +239,34 @@ const Editarperfilprof: React.FC = () => {
         backgroundAttachment: "fixed",
       }}
     >
-      {/* Header */}
-      <header className="w-full container mx-auto px-4 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="flex items-center gap-4">
+      {/* Header Responsivo */}
+      <header className="w-full container mx-auto px-2 sm:px-4 py-4 sm:py-6 flex justify-between items-center relative">
+        <div className="flex items-center gap-2 sm:gap-4">
           <Image
             onClick={() => router.push("/dashboardprof")}
             src="/images/markim-Photoroom.png"
             alt="Logo Projeto Galileu"
-            width={150}
-            height={50}
-            className="hover:scale-105 transition-transform duration-300"
+            width={120}
+            height={40}
+            className="hover:scale-105 transition-transform duration-300 cursor-pointer sm:w-[150px] sm:h-[150px]"
           />
         </div>
-        <nav>
-          <ul className="flex flex-wrap justify-center gap-6 items-center">
+
+        {/* Menu Desktop */}
+        <nav className="hidden md:block">
+          <ul className="flex gap-4 lg:gap-6 items-center">
             <li>
               <button
                 onClick={() => router.push("/dashboardprof")}
-                className="text-white hover:text-purple-300 px-6 py-3 rounded-md transition duration-300"
+                className="text-white hover:text-purple-300 px-4 lg:px-6 py-2 lg:py-3 rounded-md transition duration-300 text-sm lg:text-base"
               >
                 Início
               </button>
             </li>
-            
             <li>
               <button
                 onClick={() => router.push("/simuproftestesupabase")}
-                className="text-white px-6 py-3 rounded-md font-bold border border-purple-400"
+                className="text-white px-4 lg:px-6 py-2 lg:py-3 rounded-md font-bold border border-purple-400 text-sm lg:text-base"
               >
                 Simulações
               </button>
@@ -244,41 +274,98 @@ const Editarperfilprof: React.FC = () => {
             <li>
               <button
                 onClick={() => router.push("/editarperfilprof")}
-                className="bg-purple-600 text-white px-8 py-3 rounded-md font-bold transition duration-300 flex items-center gap-2"
+                className="bg-purple-600 text-white px-4 lg:px-8 py-2 lg:py-3 rounded-md font-bold transition duration-300 flex items-center gap-2 text-sm lg:text-base"
               >
                 <AccountCircleOutlinedIcon />
-                {user.name}
+                <span className="hidden lg:inline">{user.name}</span>
+                <span className="lg:hidden">Perfil</span>
               </button>
             </li>
           </ul>
         </nav>
+
+        {/* Container do Menu Mobile */}
+        <div className="menu-mobile-container relative md:hidden">
+          {/* Botão Menu Mobile */}
+          <button
+            onClick={toggleMenuMobile}
+            className="text-white p-2 rounded-md border border-purple-400 hover:bg-purple-600 transition duration-300"
+            aria-label="Menu"
+          >
+            <MenuIcon />
+          </button>
+
+          {/* Menu Mobile */}
+          {menuMobileAberto && (
+            <div className="absolute top-full right-0 mt-2 w-48 bg-purple-900 bg-opacity-95 backdrop-blur-sm border border-purple-400 rounded-lg shadow-lg z-50">
+              <ul className="py-2">
+                <li>
+                  <button
+                    onClick={() => {
+                      router.push("/dashboardprof");
+                      setMenuMobileAberto(false);
+                    }}
+                    className="w-full text-left text-white px-4 py-3 hover:bg-purple-700 transition duration-300"
+                  >
+                    Início
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      router.push("/simuproftestesupabase");
+                      setMenuMobileAberto(false);
+                    }}
+                    className="w-full text-left text-white px-4 py-3 hover:bg-purple-700 transition duration-300"
+                  >
+                    Simulações
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      router.push("/editarperfilprof");
+                      setMenuMobileAberto(false);
+                    }}
+                    className="w-full text-left text-white px-4 py-3 hover:bg-purple-700 transition duration-300 font-bold"
+                  >
+                    Perfil
+                  </button>
+                </li>
+              </ul>
+            </div>
+          )}
+        </div>
       </header>
 
-      {/* Containers de Edição */}
-      <div className="flex flex-col md:flex-row items-center justify-center gap-10 w-full max-w-5xl mt-12">
+      {/* Containers de Edição Responsivos */}
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-10 w-full max-w-6xl mt-6 sm:mt-8 lg:mt-12 px-2 sm:px-4">
         {/* Container da Esquerda */}
-        <div className="bg-purple-800 p-8 rounded-lg w-full md:w-2/5 shadow-lg border border-purple-400">
-          <div className="space-y-5">
-            <button className="w-full bg-red-600 py-3 rounded-md hover:bg-red-500 flex items-center justify-center gap-2 text-lg">
-              <DeleteIcon />
-              Deletar conta
+        <div className="bg-purple-800 p-4 sm:p-6 lg:p-8 rounded-lg w-full lg:w-2/5 shadow-lg border border-purple-400">
+          <div className="space-y-3 sm:space-y-4 lg:space-y-5">
+            <button className="w-full bg-red-600 py-2 sm:py-3 rounded-md hover:bg-red-500 flex items-center justify-center gap-2 text-sm sm:text-base lg:text-lg transition duration-300">
+              <DeleteIcon fontSize="small" />
+              <span className="hidden sm:inline">Deletar conta</span>
+              <span className="sm:hidden">Deletar</span>
             </button>
             <button
-              className="w-full bg-yellow-500 py-3 rounded-md hover:bg-yellow-400 flex items-center justify-center gap-2 text-lg"
+              className="w-full bg-yellow-500 py-2 sm:py-3 rounded-md hover:bg-yellow-400 flex items-center justify-center gap-2 text-sm sm:text-base lg:text-lg transition duration-300"
               onClick={() => setShowAccountModal(true)}
             >
-              <AccountCircleOutlinedIcon />
-              Mudar tipo de conta
+              <AccountCircleOutlinedIcon fontSize="small" />
+              <span className="hidden sm:inline">Mudar tipo de conta</span>
+              <span className="sm:hidden">Tipo conta</span>
             </button>
-            <button className="w-full bg-blue-500 py-3 rounded-md hover:bg-blue-400 flex items-center justify-center gap-2 text-lg">
-              <PasswordIcon />
-              Alterar Senha
+            <button className="w-full bg-blue-500 py-2 sm:py-3 rounded-md hover:bg-blue-400 flex items-center justify-center gap-2 text-sm sm:text-base lg:text-lg transition duration-300">
+              <PasswordIcon fontSize="small" />
+              <span className="hidden sm:inline">Alterar Senha</span>
+              <span className="sm:hidden">Senha</span>
             </button>
             <button
-              className="w-full bg-gray-600 py-3 rounded-md hover:bg-gray-500 flex items-center justify-center gap-2 text-lg"
+              className="w-full bg-gray-600 py-2 sm:py-3 rounded-md hover:bg-gray-500 flex items-center justify-center gap-2 text-sm sm:text-base lg:text-lg transition duration-300"
               onClick={handleLanguageToggle}
             >
-              <LanguageIcon />
+              <LanguageIcon fontSize="small" />
               Idioma
             </button>
             {showTranslator && (
@@ -288,19 +375,19 @@ const Editarperfilprof: React.FC = () => {
         </div>
 
         {/* Container da Direita */}
-        <div className="bg-purple-900 p-10 rounded-lg w-full md:w-3/5 shadow-lg border border-purple-400 bg-opacity-90 flex flex-col items-center">
+        <div className="bg-purple-900 p-6 sm:p-8 lg:p-10 rounded-lg w-full lg:w-3/5 shadow-lg border border-purple-400 bg-opacity-90 flex flex-col items-center">
           <div className="relative">
             {profileImage ? (
               <Image
                 src={profileImage}
                 alt="Perfil"
-                width={150}
-                height={150}
-                className="rounded-full border-4 border-purple-400 object-cover w-[150px] h-[150px]"
+                width={120}
+                height={120}
+                className="rounded-full border-4 border-purple-400 object-cover w-[120px] h-[120px] sm:w-[150px] sm:h-[150px]"
               />
             ) : (
-              <div className="w-[150px] h-[150px] rounded-full border-4 border-purple-400 bg-purple-700 flex items-center justify-center">
-                <PersonIcon style={{ fontSize: 80, color: '#a78bfa' }} />
+              <div className="w-[120px] h-[120px] sm:w-[150px] sm:h-[150px] rounded-full border-4 border-purple-400 bg-purple-700 flex items-center justify-center">
+                <PersonIcon style={{ fontSize: 60 }} className="sm:text-[80px] text-purple-300" />
               </div>
             )}
             
@@ -314,59 +401,72 @@ const Editarperfilprof: React.FC = () => {
             />
             <label
               htmlFor="fileInput"
-              className={`absolute bottom-0 right-0 p-3 rounded-full text-white transition cursor-pointer ${
+              className={`absolute bottom-0 right-0 p-2 sm:p-3 rounded-full text-white transition cursor-pointer ${
                 uploading 
                   ? 'bg-gray-500 cursor-not-allowed' 
                   : 'bg-purple-500 hover:bg-purple-600'
               }`}
             >
               {uploading ? (
-                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <PhotoCameraIcon />
+                <PhotoCameraIcon fontSize="small" />
               )}
             </label>
           </div>
 
-          <div className="mt-6 text-center">
-            <h2 className="text-2xl font-bold">{user.name}</h2>
-            <p className="text-md text-gray-300">
+          <div className="mt-4 sm:mt-6 text-center">
+            <h2 className="text-xl sm:text-2xl font-bold">{user.name}</h2>
+            <p className="text-sm sm:text-base text-gray-300 mt-1 sm:mt-2 break-words">
               <span className="font-semibold">Email:</span> {user.email}
             </p>
-            <p className="text-md text-gray-400 mt-2">
+            <p className="text-sm sm:text-base text-gray-400 mt-1 sm:mt-2">
               <span className="font-semibold">Tipo de Conta:</span> Professor
             </p>
           </div>
 
           <button
-            className="mt-8 w-full bg-purple-600 py-3 rounded-md hover:bg-purple-500 flex justify-center items-center gap-2 text-lg"
+            className="mt-6 sm:mt-8 w-full bg-purple-600 py-2 sm:py-3 rounded-md hover:bg-purple-500 flex justify-center items-center gap-2 text-sm sm:text-base lg:text-lg transition duration-300"
             onClick={() => setShowLogoutModal(true)}
           >
-            <LogoutIcon />
-            Encerrar sessão
+            <LogoutIcon fontSize="small" />
+            <span className="hidden sm:inline">Encerrar sessão</span>
+            <span className="sm:hidden">Sair</span>
           </button>
         </div>
       </div>
 
       {/* MODAL - Mudar Tipo de Conta */}
       {showAccountModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
-          <div className="bg-purple-900 border border-purple-400 p-8 rounded-lg text-center shadow-lg w-96">
-            <h2 className="text-2xl font-bold mb-6">Escolha o tipo de conta</h2>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 p-4">
+          <div className="bg-purple-900 border border-purple-400 p-6 sm:p-8 rounded-lg text-center shadow-lg w-full max-w-sm sm:max-w-md">
+            <h2 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6">Escolha o tipo de conta</h2>
             <button 
               onClick={() => router.push("/editarperfilaluno")}
-              className={`w-full py-3 rounded-md mb-4 ${user.accountType === "Estudante" ? "bg-purple-600 text-white" : "bg-white text-purple-600 border border-purple-600"}`}
+              className={`w-full py-2 sm:py-3 rounded-md mb-3 sm:mb-4 text-sm sm:text-base transition duration-300 ${
+                user.accountType === "Estudante" 
+                  ? "bg-purple-600 text-white" 
+                  : "bg-white text-purple-600 border border-purple-600 hover:bg-purple-50"
+              }`}
             >
               Estudante
             </button>
             <button 
               onClick={() => router.push("")}
-              className={`w-full py-3 rounded-md ${user.accountType === "Professor" ? "bg-purple-600 text-white" : "bg-white text-purple-600 border border-purple-600"}`}
+              className={`w-full py-2 sm:py-3 rounded-md mb-3 sm:mb-4 text-sm sm:text-base transition duration-300 ${
+                user.accountType === "Professor" 
+                  ? "bg-purple-600 text-white" 
+                  : "bg-white text-purple-600 border border-purple-600 hover:bg-purple-50"
+              }`}
             >
               Professor
             </button>
-            <button className="mt-4 text-white hover:text-gray-300" onClick={() => setShowAccountModal(false)}>
-              <CloseIcon /> Fechar
+            <button 
+              className="mt-2 sm:mt-4 text-white hover:text-gray-300 flex items-center justify-center gap-2 mx-auto transition duration-300" 
+              onClick={() => setShowAccountModal(false)}
+            >
+              <CloseIcon fontSize="small" />
+              Fechar
             </button>
           </div>
         </div>
@@ -374,18 +474,18 @@ const Editarperfilprof: React.FC = () => {
 
       {/* MODAL - Confirmação de Logout */}
       {showLogoutModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
-          <div className="bg-purple-900 border border-purple-400 p-8 rounded-lg text-center shadow-lg w-96">
-            <h2 className="text-2xl font-bold mb-6">Você tem certeza que deseja encerrar a sessão?</h2>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 p-4">
+          <div className="bg-purple-900 border border-purple-400 p-6 sm:p-8 rounded-lg text-center shadow-lg w-full max-w-sm sm:max-w-md">
+            <h2 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6">Você tem certeza que deseja encerrar a sessão?</h2>
             <button 
               onClick={handleLogout} 
-              className="w-full py-3 rounded-md mb-4 bg-red-600 text-white hover:bg-red-500"
+              className="w-full py-2 sm:py-3 rounded-md mb-3 sm:mb-4 bg-red-600 text-white hover:bg-red-500 text-sm sm:text-base transition duration-300"
             >
               Sim, Encerrar
             </button>
             <button 
               onClick={() => setShowLogoutModal(false)} 
-              className="w-full py-3 rounded-md bg-gray-600 text-white hover:bg-gray-500"
+              className="w-full py-2 sm:py-3 rounded-md bg-gray-600 text-white hover:bg-gray-500 text-sm sm:text-base transition duration-300"
             >
               Não, Voltar
             </button>
@@ -397,3 +497,4 @@ const Editarperfilprof: React.FC = () => {
 };
 
 export default Editarperfilprof;
+
