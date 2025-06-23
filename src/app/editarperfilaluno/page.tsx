@@ -67,7 +67,7 @@ const Editarperfilaluno: React.FC = () => {
     {
       id: 'galileuuchiha',
       name: 'Galileu Uchiha',
-      image: '/images/galileuuchiha.png'
+      image: '/images/galileuchiha.png'
     },
     {
       id: 'galileusaiyajin',
