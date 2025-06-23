@@ -38,12 +38,130 @@ const CriarQuestao = () => {
   // Estado para controlar a visibilidade do menu mobile
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // NOVO: Estado para a skin selecionada
+  const [selectedSkin, setSelectedSkin] = useState('galileufrente'); // Skin padrão
+
+  // NOVO: Lista de skins disponíveis (mesma do editarperfil)
+  const skins = [
+    {
+      id: 'galileufrente',
+      name: 'Galileu Clássico',
+      image: '/images/galileufrente.png'
+    },
+    {
+      id: 'galileuflamengo',
+      name: 'Galileu Flamengo',
+      image: '/images/galileuflamengo.png'
+    },
+    {
+      id: 'galileureal',
+      name: 'Galileu Real Madrid',
+      image: '/images/galileurealremake.png'
+    },
+    {
+      id: 'galileubrasil',
+      name: 'Galileu Brasil',
+      image: '/images/galileubrasil.png'
+    },
+    {
+      id: 'galileukakuja',
+      name: 'Galileu Kakuja',
+      image: '/images/galileukakuja.png'
+    },
+    {
+      id: 'galileuuchiha',
+      name: 'Galileu Uchiha',
+      image: '/images/galileuchiha.png'
+    },
+    {
+      id: 'galileusaiyajin',
+      name: 'Galileu Saiyajin',
+      image: '/images/galileusaiyajin.png'
+    },
+    
+    {
+      id: 'galileusollus',
+      name: 'Galileu do Sollus',
+      image: '/images/galileusollus.png'
+    },{
+      id: 'galileufuturo',
+      name: 'Galileu do Futuro',
+      image: '/images/galileufuturo.png'
+    },
+      {
+      id: 'galileureddead',
+      name: 'Galileu do Red Dead',
+      image: '/images/galileuredead.png'
+    },{
+      id: 'galileuchina',
+      name: 'Galileu Chinês',
+      image: '/images/galileuchina.png'
+    },
+    {
+      id: 'galileuegito',
+      name: 'Galileu Egípcio',
+      image: '/images/galileuegito.png'
+    },{
+      id: 'galileuninja',
+      name: 'Galileu Ninja',
+      image: '/images/galileuninja.png'
+    },
+    {
+      id: 'galileupoderoso',
+      name: 'Galileu Poderoso',
+      image: '/images/galileupoderoso.png'
+    },
+    {
+      id: 'galileuelric',
+      name: 'Galileu Elric',
+      image: '/images/galileuelric.png'
+    },
+    {
+      id: 'galileusukuna',
+      name: 'Galileu Sukuna',
+      image: '/images/galileusukuna.png'
+    },
+    {
+      id: 'galileugojo',
+      name: 'Galileu Gojo',
+      image: '/images/galileugojo.png'
+    },
+    {
+      id: 'galileupolicial',
+      name: 'Galileu Policial',
+      image: '/images/galileupolicial.png'
+    }
+
+
+    // Adicione mais skins aqui conforme necessário
+  ];
+
+  // NOVO: Função para carregar skin selecionada do localStorage
+  const loadSelectedSkin = (userId: string) => {
+    const savedSkin = localStorage.getItem(`skin_${userId}`);
+    if (savedSkin) {
+      setSelectedSkin(savedSkin);
+    }
+  };
+
+  // NOVO: Função para obter a imagem da skin atual
+  const getCurrentSkinImage = () => {
+    const skin = skins.find(s => s.id === selectedSkin);
+    return skin ? skin.image : '/images/galileufrente.png'; // Fallback para skin padrão
+  };
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       const user = JSON.parse(storedUser);
       setUserName(`Prof. ${user.name || user.email}`);
       setUserId(user.uid);
+      
+      // NOVO: Carregar skin selecionada quando o usuário for carregado
+      if (user.uid) {
+        loadSelectedSkin(user.uid);
+      }
+      
       setLoading(false);
     } else {
       router.push("/login");
@@ -204,10 +322,10 @@ const CriarQuestao = () => {
         backgroundAttachment: 'fixed',
       }}
     >
-      {/* Imagem fixa na esquerda */}
+      {/* Imagem fixa na esquerda - MODIFICADA para usar skin selecionada */}
       <div className="hidden md:block fixed left-0 bottom-0 z-10">
         <Image
-          src="/images/galileufrente.png"
+          src={getCurrentSkinImage()} // MUDANÇA: Usar função para obter imagem da skin atual
           alt="Galileu"
           width={200} // Ajuste o tamanho conforme necessário
           height={300}
@@ -387,7 +505,7 @@ const CriarQuestao = () => {
                 <select
                   value={alternativaCorreta}
                   onChange={(e) => setAlternativaCorreta(e.target.value)}
-                  className={`w-full p-3 rounded-md text-black border border-gray-300 mb-4 ${erros.alternativaCorreta ? 'border-red-500' : ''}`}
+                  className={`w-full p-2 border rounded text-black ${erros.alternativaCorreta ? 'border-red-500' : ''}`}
                 >
                   <option value="">Selecione a alternativa correta</option>
                   <option value="A">A</option>
@@ -400,109 +518,110 @@ const CriarQuestao = () => {
               </div>
 
               <div className="mb-4">
-                <label className="block mb-2 text-white">Tempo</label>
-                <button
-                  type="button"
-                  className="bg-purple-600 text-white py-2 px-4 rounded-md"
-                  onClick={() => setMostrarModalTempo(true)}
-                >
-                  Definir Tempo
-                </button>
-                {mostrarModalTempo && (
-                  <div className="modal bg-black bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center"> {/* Usado inset-0 para cobrir toda a tela */}
-                    <div className="bg-purple-900 border border-purple-200 p-8 rounded-md">
-                      <h3 className="text-xl font-bold mb-4">Tempo</h3>
-                      <div className="flex flex-col sm:flex-row items-center mb-4"> {/* Flex-col para telas pequenas, flex-row para sm+ */}
-                        <div className="flex items-center mb-2 sm:mb-0 sm:mr-4">
-                          <label htmlFor="minutos" className="text-white mr-2">Minutos</label>
-                          <input
-                            id="minutos"
-                            type="number"
-                            min="0"
-                            value={tempoMinutos}
-                            onChange={(e) => setTempoMinutos(Math.max(0, +e.target.value))}
-                            placeholder="Minutos"
-                            className="p-2 border rounded text-black w-20"
-                          />
-                        </div>
-                        <span className="text-white hidden sm:block">:</span> {/* Esconde o ":" em telas muito pequenas */}
-                        <div className="flex items-center mt-2 sm:mt-0 sm:ml-4">
-                          <label htmlFor="segundos" className="text-white mr-2">Segundos</label>
-                          <input
-                            id="segundos"
-                            type="number"
-                            min="0"
-                            max="59"
-                            value={tempoSegundos}
-                            onChange={(e) => setTempoSegundos(Math.max(0, Math.min(59, +e.target.value)))}
-                            placeholder="Segundos"
-                            className="p-2 border rounded text-black w-20"
-                          />
-                        </div>
-                      </div>
-                      <div className="mt-4 flex justify-end"> {/* Botões alinhados à direita */}
-                        <button
-                          type="button"
-                          className="bg-red-500 text-white py-2 px-4 rounded-md mr-2"
-                          onClick={() => setMostrarModalTempo(false)}
-                        >
-                          Cancelar
-                        </button>
-                        <button
-                          type="button"
-                          className="bg-green-500 text-white py-2 px-4 rounded-md"
-                          onClick={() => setMostrarModalTempo(false)}
-                        >
-                          Confirmar
-                        </button>
-                      </div>
+                <label className="block mb-2 text-white">Anexo (Opcional)</label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAnexoChange}
+                    className="text-white"
+                  />
+                  {imageUrl && (
+                    <div className="relative">
+                      <Image
+                        src={imageUrl}
+                        alt="Preview"
+                        width={100}
+                        height={100}
+                        className="rounded border"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRemoveImage}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                      >
+                        <XCircle size={16} />
+                      </button>
                     </div>
-                  </div>
-                )}
-              </div>
-              <div className="mb-4">
-                <label className="block mb-2 text-white">Anexo</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="p-2 border rounded w-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100" // Estilização para o input file
-                  onChange={handleAnexoChange}
-                />
-                {imageUrl && (
-                  <div className="mt-4 relative w-fit mx-auto"> {/* Centraliza a imagem anexa */}
-                    <Image
-                      src={imageUrl}
-                      alt="Imagem anexa"
-                      width={200}
-                      height={200}
-                      className="object-contain border border-purple-400 rounded-md"
-                    />
-                    <button
-                      type="button"
-                      className="absolute -top-2 -right-2 text-red-500 bg-white rounded-full p-1" // Botão de remover mais visível
-                      onClick={handleRemoveImage}
-                    >
-                      <XCircle size={24} />
-                    </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
-              <div className="mt-4">
+              <div className="mb-4">
+                <label className="block mb-2 text-white">Tempo (Opcional)</label>
                 <button
                   type="button"
-                  className="bg-green-500 text-white px-6 py-3 rounded-md hover:bg-green-600 transition duration-300"
-                  onClick={handleSalvarQuestao}
+                  onClick={() => setMostrarModalTempo(true)}
+                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500 flex items-center gap-2"
                 >
-                  Salvar Questão
+                  <Clock size={16} />
+                  {tempoMinutos > 0 || tempoSegundos > 0
+                    ? `${tempoMinutos}m ${tempoSegundos}s`
+                    : 'Definir Tempo'}
                 </button>
               </div>
+
+              <button
+                type="button"
+                onClick={handleSalvarQuestao}
+                className="bg-green-600 text-white px-6 py-3 rounded font-bold hover:bg-green-500 transition duration-300"
+              >
+                Salvar Questão
+              </button>
             </form>
           </div>
         </div>
       </div>
+
+      {/* Modal de Tempo */}
+      {mostrarModalTempo && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
+            <h3 className="text-lg font-bold mb-4 text-black">Definir Tempo</h3>
+            <div className="flex gap-4 mb-4">
+              <div>
+                <label className="block text-sm font-medium text-black mb-1">Minutos</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={tempoMinutos}
+                  onChange={(e) => setTempoMinutos(Math.max(0, parseInt(e.target.value) || 0))}
+                  className="w-full p-2 border rounded text-black"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-black mb-1">Segundos</label>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={tempoSegundos}
+                  onChange={(e) => setTempoSegundos(Math.max(0, parseInt(e.target.value) || 0))}
+                  className="w-full p-2 border rounded text-black"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => setMostrarModalTempo(false)}
+                className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => setMostrarModalTempo(false)}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default CriarQuestao;
+

@@ -50,6 +50,115 @@ const SimulacoesAnterioresAluno: React.FC = () => {
   const [modalConfirmacaoAberto, setModalConfirmacaoAberto] = useState(false);
   const [simulacaoParaExcluir, setSimulacaoParaExcluir] = useState<Simulacao | null>(null);
 
+  // NOVO: Estado para a skin selecionada
+  const [selectedSkin, setSelectedSkin] = useState('galileufrente'); // Skin padrão
+
+  // NOVO: Lista de skins disponíveis (mesma do editarperfil)
+  const skins = [
+    {
+      id: 'galileufrente',
+      name: 'Galileu Clássico',
+      image: '/images/galileufrente.png'
+    },
+    {
+      id: 'galileuflamengo',
+      name: 'Galileu Flamengo',
+      image: '/images/galileuflamengo.png'
+    },
+    {
+      id: 'galileureal',
+      name: 'Galileu Real Madrid',
+      image: '/images/galileurealremake.png'
+    },
+    {
+      id: 'galileubrasil',
+      name: 'Galileu Brasil',
+      image: '/images/galileubrasil.png'
+    },
+    {
+      id: 'galileukakuja',
+      name: 'Galileu Kakuja',
+      image: '/images/galileukakuja.png'
+    },
+    {
+      id: 'galileuuchiha',
+      name: 'Galileu Uchiha',
+      image: '/images/galileuchiha.png'
+    },
+    {
+      id: 'galileusaiyajin',
+      name: 'Galileu Saiyajin',
+      image: '/images/galileusaiyajin.png'
+    },
+    
+    {
+      id: 'galileusollus',
+      name: 'Galileu do Sollus',
+      image: '/images/galileusollus.png'
+    },{
+      id: 'galileufuturo',
+      name: 'Galileu do Futuro',
+      image: '/images/galileufuturo.png'
+    },
+      {
+      id: 'galileureddead',
+      name: 'Galileu do Red Dead',
+      image: '/images/galileuredead.png'
+    },{
+      id: 'galileuchina',
+      name: 'Galileu Chinês',
+      image: '/images/galileuchina.png'
+    },
+    {
+      id: 'galileuegito',
+      name: 'Galileu Egípcio',
+      image: '/images/galileuegito.png'
+    },{
+      id: 'galileuninja',
+      name: 'Galileu Ninja',
+      image: '/images/galileuninja.png'
+    },
+    {
+      id: 'galileupoderoso',
+      name: 'Galileu Poderoso',
+      image: '/images/galileupoderoso.png'
+    },
+    {
+      id: 'galileuelric',
+      name: 'Galileu Elric',
+      image: '/images/galileuelric.png'
+    },
+    {
+      id: 'galileusukuna',
+      name: 'Galileu Sukuna',
+      image: '/images/galileusukuna.png'
+    },
+    {
+      id: 'galileugojo',
+      name: 'Galileu Gojo',
+      image: '/images/galileugojo.png'
+    },
+    {
+      id: 'galileupolicial',
+      name: 'Galileu Policial',
+      image: '/images/galileupolicial.png'
+    }
+  ];
+
+  // NOVO: Função para carregar skin selecionada do localStorage
+  const loadSelectedSkin = (userId: string) => {
+    const savedSkin = localStorage.getItem(`skin_${userId}`);
+    if (savedSkin) {
+      setSelectedSkin(savedSkin);
+    }
+  };
+
+  // NOVO: Função para obter a imagem da skin atual
+  const getCurrentSkinImage = () => {
+    const skin = skins.find(s => s.id === selectedSkin);
+    return skin ? skin.image : '/images/galileufrente.png'; // Fallback para skin padrão
+  };
+
   // Função para garantir que o valor seja um número e formatá-lo
   const formatarNumero = (valor: any, casasDecimais: number = 2): string => {
     if (valor === null || valor === undefined || valor === '') {
@@ -71,6 +180,10 @@ const SimulacoesAnterioresAluno: React.FC = () => {
       setUserName(user.name || user.email);
       setLoading(false);
       carregarSimulacoes(user.name || user.email);
+      // NOVO: Carregar skin selecionada quando o usuário for carregado
+      if (user.uid) {
+        loadSelectedSkin(user.uid);
+      }
     } else {
       router.push("/login");
     }
@@ -491,10 +604,10 @@ const SimulacoesAnterioresAluno: React.FC = () => {
         backgroundAttachment: "fixed",
       }}
     >
-      {/* Imagem do Galileu - oculta em mobile */}
+      {/* Imagem do Galileu - oculta em mobile - MODIFICADA para usar skin selecionada */}
       <div className="hidden lg:block fixed right-0 bottom-0 z-10">
         <Image
-          src="/images/galileuimagem.png"
+          src={getCurrentSkinImage()} // MUDANÇA: Usar função para obter imagem da skin atual
           alt="Galileu"
           width={300}
           height={300}

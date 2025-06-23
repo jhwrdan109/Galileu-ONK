@@ -16,6 +16,7 @@ import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonIcon from "@mui/icons-material/Person";
 import MenuIcon from "@mui/icons-material/Menu";
+import PaletteIcon from "@mui/icons-material/Palette"; // Ícone para skins
 
 const Editarperfilprof: React.FC = () => {
   const router = useRouter();
@@ -30,9 +31,106 @@ const Editarperfilprof: React.FC = () => {
   const [showTranslator, setShowTranslator] = useState(false);
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showSkinModal, setShowSkinModal] = useState(false); // Modal para skins
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
+  const [selectedSkin, setSelectedSkin] = useState('galileufrente'); // Skin padrão
+
+  // Lista de skins disponíveis
+  const skins = [
+    {
+      id: 'galileufrente',
+      name: 'Galileu Clássico',
+      image: '/images/galileufrente.png'
+    },
+    {
+      id: 'galileuflamengo',
+      name: 'Galileu Flamengo',
+      image: '/images/galileuflamengo.png'
+    },
+     {
+      id: 'galileureal',
+      name: 'Galileu Real Madrid',
+      image: '/images/galileurealremake.png'
+    },
+    {
+      id: 'galileubrasil',
+      name: 'Galileu Brasil',
+      image: '/images/galileubrasil.png'
+    },
+    {
+      id: 'galileukakuja',
+      name: 'Galileu Kakuja',
+      image: '/images/galileukakuja.png'
+    },
+    {
+      id: 'galileuuchiha',
+      name: 'Galileu Uchiha',
+      image: '/images/galileuchiha.png'
+    },
+    {
+      id: 'galileusaiyajin',
+      name: 'Galileu Saiyajin',
+      image: '/images/galileusaiyajin.png'
+    },
+    {
+      id: 'galileufuturo',
+      name: 'Galileu do Futuro',
+      image: '/images/galileufuturo.png'
+    },
+    
+    {
+      id: 'galileusollus',
+      name: 'Galileu do Sollus',
+      image: '/images/galileusollus.png'
+    },
+      {
+      id: 'galileureddead',
+      name: 'Galileu do Red Dead',
+      image: '/images/galileuredead.png'
+    },{
+      id: 'galileuchina',
+      name: 'Galileu Chinês',
+      image: '/images/galileuchina.png'
+    },
+    {
+      id: 'galileuegito',
+      name: 'Galileu Egípcio',
+      image: '/images/galileuegito.png'
+    },{
+      id: 'galileuninja',
+      name: 'Galileu Ninja',
+      image: '/images/galileuninja.png'
+    },
+    {
+      id: 'galileupoderoso',
+      name: 'Galileu Poderoso',
+      image: '/images/galileupoderoso.png'
+    },
+    {
+      id: 'galileuelric',
+      name: 'Galileu Elric',
+      image: '/images/galileuelric.png'
+    },
+    {
+      id: 'galileusukuna',
+      name: 'Galileu Sukuna',
+      image: '/images/galileusukuna.png'
+    },
+    {
+      id: 'galileugojo',
+      name: 'Galileu Egoísta',
+      image: '/images/galileugojo.png'
+    },
+    {
+      id: 'galileupolicial',
+      name: 'Galileu Policial',
+      image: '/images/galileupolicial.png'
+    }
+
+    // Adicione mais skins aqui conforme necessário
+  ];
 
   useEffect(() => {
     // Escutar mudanças de autenticação do Firebase
@@ -64,6 +162,8 @@ const Editarperfilprof: React.FC = () => {
 
         // Carregar foto de perfil usando o UID do Firebase
         loadProfileImage(firebaseUser.uid);
+        // Carregar skin selecionada
+        loadSelectedSkin(firebaseUser.uid);
         setLoading(false);
       } else {
         // Usuário não autenticado
@@ -118,6 +218,21 @@ const Editarperfilprof: React.FC = () => {
     } catch (error) {
       console.error('Erro ao carregar foto de perfil:', error);
     }
+  };
+
+  // Carregar skin selecionada do localStorage
+  const loadSelectedSkin = (userId: string) => {
+    const savedSkin = localStorage.getItem(`skin_${userId}`);
+    if (savedSkin) {
+      setSelectedSkin(savedSkin);
+    }
+  };
+
+  // Salvar skin selecionada
+  const handleSkinChange = (skinId: string) => {
+    setSelectedSkin(skinId);
+    localStorage.setItem(`skin_${user.uid}`, skinId);
+    setShowSkinModal(false);
   };
 
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -368,6 +483,15 @@ const Editarperfilprof: React.FC = () => {
               <LanguageIcon fontSize="small" />
               Idioma
             </button>
+            {/* NOVO BOTÃO PARA SKINS */}
+            <button
+              className="w-full bg-pink-600 py-2 sm:py-3 rounded-md hover:bg-pink-500 flex items-center justify-center gap-2 text-sm sm:text-base lg:text-lg transition duration-300"
+              onClick={() => setShowSkinModal(true)}
+            >
+              <PaletteIcon fontSize="small" />
+              <span className="hidden sm:inline">Mudar Skin</span>
+              <span className="sm:hidden">Skins</span>
+            </button>
             {showTranslator && (
               <div id="google_translate_element" className="mt-4 text-black bg-white rounded-md p-2" />
             )}
@@ -423,6 +547,9 @@ const Editarperfilprof: React.FC = () => {
             <p className="text-sm sm:text-base text-gray-400 mt-1 sm:mt-2">
               <span className="font-semibold">Tipo de Conta:</span> Professor
             </p>
+            <p className="text-sm sm:text-base text-gray-400 mt-1 sm:mt-2">
+              <span className="font-semibold">Skin Atual:</span> {skins.find(s => s.id === selectedSkin)?.name}
+            </p>
           </div>
 
           <button
@@ -435,6 +562,61 @@ const Editarperfilprof: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* MODAL - Seleção de Skins */}
+      {/* MODAL - Seleção de Skins */}
+{showSkinModal && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 p-4">
+    <div className="bg-purple-900 border border-purple-400 p-6 sm:p-8 rounded-lg text-center shadow-lg w-full max-w-6xl max-h-[90vh] flex flex-col">
+      <h2 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6">Escolha sua Skin</h2>
+      
+      {/* Container com scroll para as skins */}
+      <div className="flex-1 overflow-y-auto mb-6 px-2" style={{ maxHeight: '60vh' }}>
+        {/* Grid responsivo: 2 colunas no mobile, 9 colunas no desktop */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 lg:grid-cols-9 gap-3 sm:gap-4">
+          {skins.map((skin) => (
+            <div
+              key={skin.id}
+              className={`cursor-pointer border-2 rounded-lg p-2 sm:p-3 transition duration-300 flex flex-col items-center ${
+                selectedSkin === skin.id 
+                  ? 'border-purple-400 bg-purple-800' 
+                  : 'border-gray-600 bg-purple-700 hover:border-purple-500'
+              }`}
+              onClick={() => handleSkinChange(skin.id)}
+            >
+              <div className="w-16 h-20 sm:w-20 sm:h-24 flex items-center justify-center">
+                <Image
+                  src={skin.image}
+                  alt={skin.name}
+                  width={60}
+                  height={75}
+                  className="object-contain max-w-full max-h-full"
+                />
+              </div>
+              <p className="text-xs mt-2 font-medium text-center break-words leading-tight">
+                {skin.name}
+              </p>
+              {selectedSkin === skin.id && (
+                <p className="text-xs text-purple-300 mt-1 text-center">✓ Selecionada</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      <button 
+        className="mt-2 sm:mt-4 text-white hover:text-gray-300 flex items-center justify-center gap-2 mx-auto transition duration-300" 
+        onClick={() => setShowSkinModal(false)}
+      >
+        <CloseIcon fontSize="small" />
+        Fechar
+      </button>
+    </div>
+  </div>
+)}
+
+// Alternative: If you want exactly 2 columns with multiple rows, use this instead:
+
 
       {/* MODAL - Mudar Tipo de Conta */}
       {showAccountModal && (
@@ -497,4 +679,3 @@ const Editarperfilprof: React.FC = () => {
 };
 
 export default Editarperfilprof;
-

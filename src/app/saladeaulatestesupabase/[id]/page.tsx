@@ -109,6 +109,121 @@ const SalaDeAulaTesteSupabase: React.FC = () => {
   const [quizFinished, setQuizFinished] = useState(false);
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
 
+  // NOVO: Estado para a skin selecionada
+  const [selectedSkin, setSelectedSkin] = useState('galileufrente'); // Skin padrão
+
+  // NOVO: Lista de skins disponíveis (mesma do editarperfil)
+  const skins = [
+    {
+      id: 'galileufrente',
+      name: 'Galileu Clássico',
+      image: '/images/galileufrente.png'
+    },
+    {
+      id: 'galileuflamengo',
+      name: 'Galileu Flamengo',
+      image: '/images/galileuflamengo.png'
+    },
+    {
+      id: 'galileureal',
+      name: 'Galileu Real Madrid',
+      image: '/images/galileurealremake.png'
+    },
+    {
+      id: 'galileubrasil',
+      name: 'Galileu Brasil',
+      image: '/images/galileubrasil.png'
+    },
+    {
+      id: 'galileukakuja',
+      name: 'Galileu Kakuja',
+      image: '/images/galileukakuja.png'
+    },
+    {
+      id: 'galileuuchiha',
+      name: 'Galileu Uchiha',
+      image: '/images/galileuchiha.png'
+    },
+    {
+      id: 'galileusaiyajin',
+      name: 'Galileu Saiyajin',
+      image: '/images/galileusaiyajin.png'
+    },
+    
+    {
+      id: 'galileusollus',
+      name: 'Galileu do Sollus',
+      image: '/images/galileusollus.png'
+    },{
+      id: 'galileufuturo',
+      name: 'Galileu do Futuro',
+      image: '/images/galileufuturo.png'
+    },
+      {
+      id: 'galileureddead',
+      name: 'Galileu do Red Dead',
+      image: '/images/galileuredead.png'
+    },{
+      id: 'galileuchina',
+      name: 'Galileu Chinês',
+      image: '/images/galileuchina.png'
+    },
+    {
+      id: 'galileuegito',
+      name: 'Galileu Egípcio',
+      image: '/images/galileuegito.png'
+    },{
+      id: 'galileuninja',
+      name: 'Galileu Ninja',
+      image: '/images/galileuninja.png'
+    },
+    {
+      id: 'galileupoderoso',
+      name: 'Galileu Poderoso',
+      image: '/images/galileupoderoso.png'
+    },
+    {
+      id: 'galileuelric',
+      name: 'Galileu Elric',
+      image: '/images/galileuelric.png'
+    },
+    {
+      id: 'galileusukuna',
+      name: 'Galileu Sukuna',
+      image: '/images/galileusukuna.png'
+    },
+    {
+      id: 'galileugojo',
+      name: 'Galileu Gojo',
+      image: '/images/galileugojo.png'
+    },
+    {
+      id: 'galileupolicial',
+      name: 'Galileu Policial',
+      image: '/images/galileupolicial.png'
+    }
+  ];
+
+  // NOVO: Função para carregar skin selecionada do localStorage
+  const loadSelectedSkin = () => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      if (user.uid) {
+        const savedSkin = localStorage.getItem(`skin_${user.uid}`);
+        if (savedSkin) {
+          setSelectedSkin(savedSkin);
+        }
+      }
+    }
+  };
+
+  // NOVO: Função para obter a imagem da skin atual
+  const getCurrentSkinImage = () => {
+    const skin = skins.find(s => s.id === selectedSkin);
+    return skin ? skin.image : '/images/galileufrente.png'; // Fallback para skin padrão
+  };
+
   const currentQuestion = questoes[currentQuestionIndex];
 
   // Função para fechar o menu mobile ao clicar fora
@@ -137,6 +252,8 @@ const SalaDeAulaTesteSupabase: React.FC = () => {
       setErrorSala("ID da sala não encontrado ou inválido.");
       setLoadingSala(false);
     }
+    // NOVO: Carregar a skin quando o componente montar
+    loadSelectedSkin();
   }, [salaId]);
 
   useEffect(() => {
@@ -375,7 +492,7 @@ const SalaDeAulaTesteSupabase: React.FC = () => {
       <div className="hidden lg:block fixed left-2 xl:left-4 bottom-4 z-20">
         <div className="flex flex-col items-center">
           <Image
-            src="/images/galileuimagem.png"
+            src={getCurrentSkinImage()} // MODIFICADO: Usando a skin selecionada
             alt="Galileu"
             width={150}
             height={150}
