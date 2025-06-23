@@ -4,8 +4,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-// Não precisamos mais de Menu e X do lucide-react se usarmos SVG genérico como no Dashboardaluno
-// import { Menu, X } from 'lucide-react';
 
 const Dashboardprof: React.FC = () => {
   const router = useRouter();
@@ -231,7 +229,7 @@ const Dashboardprof: React.FC = () => {
               </li>
               <li>
                 <button
-                  onClick={() => handleNavigation("/simuproftestesupabase")} // Usar handleNavigation
+                  onClick={() => router.push("/simuproftestesupabase")} // Usar handleNavigation
                   className="text-white px-4 py-2 xl:px-6 xl:py-3 rounded-md border border-purple-400 bg-transparent hover:text-purple-300 hover:border-purple-300 transition duration-300 shadow-md hover:shadow-lg text-sm xl:text-base"
                 >
                   Simulações
@@ -239,7 +237,7 @@ const Dashboardprof: React.FC = () => {
               </li>
               <li>
                 <button
-                  onClick={() => handleNavigation("/editarperfilprof")} // Usar handleNavigation
+                  onClick={() => router.push("/editarperfilprof")} // Usar handleNavigation
                   className="bg-purple-600 text-white px-4 py-2 xl:px-8 xl:py-3 rounded-md font-bold transition duration-300 shadow-lg hover:bg-purple-500 hover:shadow-xl text-sm xl:text-base truncate max-w-[120px] xl:max-w-none"
                 >
                   {userName}
