@@ -316,7 +316,6 @@ const Dashboardaluno: React.FC = () => {
   </button>
         </main>
       </div>
-
       <div
         ref={quemSomosRef}
         className="bg-white py-8 sm:py-12 px-4 sm:px-6 mt-12 sm:mt-24 border-t-4 border-purple-950 shadow-lg"
@@ -331,5 +330,5 @@ const Dashboardaluno: React.FC = () => {
     </div>
   );
 };
-
+/*haise */
 export default Dashboardaluno;
