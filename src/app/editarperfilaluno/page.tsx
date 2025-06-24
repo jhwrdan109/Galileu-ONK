@@ -21,6 +21,48 @@ import PaletteIcon from "@mui/icons-material/Palette"; // Ícone para skins
 
 const Editarperfilaluno: React.FC = () => {
   const router = useRouter();
+  const [skinSearchText, setSkinSearchText] = useState('');
+  const [showSecretSkin, setShowSecretSkin] = useState(false);
+  const [showBurgaSkin, setShowBurgaSkin] = useState(false);
+  const [showSerafimSkin, setShowSerafimSkin] = useState(false);
+  const [showCorinthiansSkin, setShowCorinthiansSkin] = useState(false);
+  const [showVelocistaSkin, setShowVelocistaSkin] = useState(false);
+  const secretSkin = {
+    id: 'galileudias',
+    name: 'Galileu Dias',
+    image: '/images/galileudias.png'
+  };
+  const burgaSkin = {
+    id: 'galileuburga',
+    name: 'Galileu Burga',
+    image: '/images/galileuburga.png'
+  };
+  const serafimSkin = {
+    id: 'galileuserafim', 
+    name: 'Galileu Serafim',
+    image: '/images/galileuserafim.png'
+  };
+  const corinthiansSkin = {
+    id: 'galileucorinthians',
+    name: 'Galileu Corinthians', 
+    image: '/images/galileucorinthians.png'
+  };
+  const velocistaSkin = {
+    id: 'galileuvelocista',
+    name: 'Galileu Velocista',
+    image: '/images/galileuvelocista.png'
+  };
+  const handleSearchChange = (text: string) => {
+  setSkinSearchText(text);
+  const lowerText = text.toLowerCase();
+  
+  setShowSecretSkin(lowerText.includes('dias'));
+  setShowBurgaSkin(lowerText.includes('gabrieleburga')); // Use 'gabrieleburga' para ativar
+  setShowSerafimSkin(lowerText.includes('serafim')); 
+  setShowCorinthiansSkin(lowerText.includes('corinthians'));
+  setShowVelocistaSkin(lowerText.includes('velocista'));
+};
+
   // Dentro do seu componente Editarperfilprof:
 const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
 const [currentPassword, setCurrentPassword] = useState('');
@@ -126,7 +168,13 @@ const handleDeleteAccount = async () => {
   const [loading, setLoading] = useState(true);
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
   const [selectedSkin, setSelectedSkin] = useState('galileufrente'); // Skin padrão
-
+const handleSkinChange = (skinId: string) => {
+  setSelectedSkin(skinId);
+  localStorage.setItem(`skin_${user.uid}`, skinId);
+  setShowSkinModal(false);
+  setSkinSearchText('');
+  setShowSecretSkin(false);
+};
   // Lista de skins disponíveis
   const skins = [
     {
@@ -319,11 +367,8 @@ const handleDeleteAccount = async () => {
   };
 
   // Salvar skin selecionada
-  const handleSkinChange = (skinId: string) => {
-    setSelectedSkin(skinId);
-    localStorage.setItem(`skin_${user.uid}`, skinId);
-    setShowSkinModal(false);
-  };
+
+
 
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files || event.target.files.length === 0) {
@@ -639,9 +684,21 @@ const handleDeleteAccount = async () => {
             <p className="text-sm sm:text-base text-gray-400 mt-1 sm:mt-2">
               <span className="font-semibold">Tipo de Conta:</span> Estudante
             </p>
-            <p className="text-sm sm:text-base text-gray-400 mt-1 sm:mt-2">
-              <span className="font-semibold">Skin Atual:</span> {skins.find(s => s.id === selectedSkin)?.name}
-            </p>
+               <p className="text-sm sm:text-base text-gray-400 mt-1 sm:mt-2">
+  <span className="font-semibold">Skin Atual:</span> {
+    selectedSkin === 'galileudias' 
+      ? secretSkin.name 
+      : selectedSkin === 'galileuburga'
+      ? burgaSkin.name
+      : selectedSkin === 'galileuserafim' 
+      ? serafimSkin.name
+      : selectedSkin === 'galileucorinthians'
+      ? corinthiansSkin.name  
+      : selectedSkin === 'galileuvelocista'
+      ? velocistaSkin.name
+      : skins.find(s => s.id === selectedSkin)?.name
+  }
+</p>
           </div>
 
           <button
@@ -656,55 +713,156 @@ const handleDeleteAccount = async () => {
       </div>
 
       {/* MODAL - Seleção de Skins */}
-      {showSkinModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 p-4">
-          <div className="bg-purple-900 border border-purple-400 p-6 sm:p-8 rounded-lg text-center shadow-lg w-full max-w-6xl max-h-[90vh] flex flex-col">
-            <h2 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6">Escolha sua Skin</h2>
-            
-            {/* Container com scroll para as skins */}
-            <div className="flex-1 overflow-y-auto mb-6 px-2" style={{ maxHeight: '60vh' }}>
-              {/* Grid responsivo: 2 colunas no mobile, 9 colunas no desktop */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 lg:grid-cols-9 gap-3 sm:gap-4">
-                {skins.map((skin) => (
-                  <div
-                    key={skin.id}
-                    className={`cursor-pointer border-2 rounded-lg p-2 sm:p-3 transition duration-300 flex flex-col items-center ${
-                      selectedSkin === skin.id 
-                        ? 'border-purple-400 bg-purple-800' 
-                        : 'border-gray-600 bg-purple-700 hover:border-purple-500'
-                    }`}
-                    onClick={() => handleSkinChange(skin.id)}
-                  >
-                    <div className="w-16 h-20 sm:w-20 sm:h-24 flex items-center justify-center">
-                      <Image
-                        src={skin.image}
-                        alt={skin.name}
-                        width={60}
-                        height={75}
-                        className="object-contain max-w-full max-h-full"
-                      />
-                    </div>
-                    <p className="text-xs mt-2 font-medium text-center break-words leading-tight">
-                      {skin.name}
-                    </p>
-                    {selectedSkin === skin.id && (
-                      <p className="text-xs text-purple-300 mt-1 text-center">✓ Selecionada</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <button 
-              className="mt-2 sm:mt-4 text-white hover:text-gray-300 flex items-center justify-center gap-2 mx-auto transition duration-300" 
-              onClick={() => setShowSkinModal(false)}
+     {showSkinModal && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 p-4">
+    <div className="bg-purple-900 border border-purple-400 p-6 sm:p-8 rounded-lg text-center shadow-lg w-full max-w-6xl max-h-[90vh] flex flex-col">
+      <h2 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6">Escolha sua Skin</h2>
+      
+      {/* Campo de busca secreto */}
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Buscar skin especial..."
+          className="w-full max-w-md mx-auto p-3 rounded-md bg-gray-700 text-white placeholder-gray-400"
+          value={skinSearchText}
+          onChange={(e) => handleSearchChange(e.target.value)}
+        />
+      </div>
+      
+      {/* Container com scroll para as skins */}
+      <div className="flex-1 overflow-y-auto mb-6 px-2" style={{ maxHeight: '60vh' }}>
+        {/* Grid responsivo: 2 colunas no mobile, 9 colunas no desktop */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 lg:grid-cols-9 gap-3 sm:gap-4">
+          {/* Skin secreta aparece primeiro se ativada */}
+          {showSecretSkin && (
+            <div
+              className={`cursor-pointer border-2 rounded-lg p-2 sm:p-3 transition duration-300 flex flex-col items-center animate-pulse ${
+                selectedSkin === secretSkin.id 
+                  ? 'border-gold-400 bg-yellow-800 shadow-lg shadow-yellow-400/50' 
+                  : 'border-yellow-600 bg-yellow-700 hover:border-yellow-500 shadow-md shadow-yellow-400/30'
+              }`}
+              onClick={() => handleSkinChange(secretSkin.id)}
             >
-              <CloseIcon fontSize="small" />
-              Fechar
-            </button>
-          </div>
+              <div className="w-16 h-20 sm:w-20 sm:h-24 flex items-center justify-center">
+                <Image
+                  src={secretSkin.image}
+                  alt={secretSkin.name}
+                  width={60}
+                  height={75}
+                  className="object-contain max-w-full max-h-full"
+                />
+              </div>
+              <p className="text-xs mt-2 font-medium text-center break-words leading-tight text-yellow-200">
+                ⭐ {secretSkin.name} ⭐
+              </p>
+              {selectedSkin === secretSkin.id && (
+                <p className="text-xs text-yellow-300 mt-1 text-center">✓ Selecionada</p>
+              )}
+            </div>
+          )}
+          {showBurgaSkin && (
+  <div className={`cursor-pointer border-2 rounded-lg p-2 sm:p-3 transition duration-300 flex flex-col items-center animate-pulse ${
+    selectedSkin === burgaSkin.id ? 'border-gold-400 bg-yellow-800 shadow-lg shadow-yellow-400/50' : 'border-yellow-600 bg-yellow-700 hover:border-yellow-500 shadow-md shadow-yellow-400/30'}`}
+    onClick={() => handleSkinChange(burgaSkin.id)}>
+    <div className="w-16 h-20 sm:w-20 sm:h-24 flex items-center justify-center">
+      <Image src={burgaSkin.image} alt={burgaSkin.name} width={60} height={75} className="object-contain max-w-full max-h-full"/>
+    </div>
+    <p className="text-xs mt-2 font-medium text-center break-words leading-tight text-yellow-200">⭐ {burgaSkin.name} ⭐</p>
+    {selectedSkin === burgaSkin.id && <p className="text-xs text-yellow-300 mt-1 text-center">✓ Selecionada</p>}
+  </div>
+)}
+
+{showSerafimSkin && (
+  
+  <div className={`cursor-pointer border-2 rounded-lg p-2 sm:p-3 transition duration-300 flex flex-col items-center animate-pulse ${
+    selectedSkin === serafimSkin.id ? 'border-gold-400 bg-yellow-800 shadow-lg shadow-yellow-400/50' : 'border-yellow-600 bg-yellow-700 hover:border-yellow-500 shadow-md shadow-yellow-400/30'}`}
+    onClick={() => handleSkinChange(serafimSkin.id)}>
+    <div className="w-16 h-20 sm:w-20 sm:h-24 flex items-center justify-center">
+      <Image src={serafimSkin.image} alt={serafimSkin.name} width={60} height={75} className="object-contain max-w-full max-h-full"/>
+    </div>
+    <p className="text-xs mt-2 font-medium text-center break-words leading-tight text-yellow-200">⭐ {serafimSkin.name} ⭐</p>
+    {selectedSkin === serafimSkin.id && <p className="text-xs text-yellow-300 mt-1 text-center">✓ Selecionada</p>}
+  </div>
+)
+}
+
+{showCorinthiansSkin && (
+  
+  <div className={`cursor-pointer border-2 rounded-lg p-2 sm:p-3 transition duration-300 flex flex-col items-center animate-pulse ${
+    selectedSkin === corinthiansSkin.id ? 'border-gold-400 bg-yellow-800 shadow-lg shadow-yellow-400/50' : 'border-yellow-600 bg-yellow-700 hover:border-yellow-500 shadow-md shadow-yellow-400/30'}`}
+    onClick={() => handleSkinChange(corinthiansSkin.id)}>
+    <div className="w-16 h-20 sm:w-20 sm:h-24 flex items-center justify-center">
+      <Image src={corinthiansSkin.image} alt={corinthiansSkin.name} width={60} height={75} className="object-contain max-w-full max-h-full"/>
+    </div>
+    <p className="text-xs mt-2 font-medium text-center break-words leading-tight text-yellow-200">⭐ {corinthiansSkin.name} ⭐</p>
+    {selectedSkin === corinthiansSkin.id && <p className="text-xs text-yellow-300 mt-1 text-center">✓ Selecionada</p>}
+  </div>
+)
+}
+
+{showVelocistaSkin && (
+  
+  <div className={`cursor-pointer border-2 rounded-lg p-2 sm:p-3 transition duration-300 flex flex-col items-center animate-pulse ${
+    selectedSkin === velocistaSkin.id ? 'border-gold-400 bg-yellow-800 shadow-lg shadow-yellow-400/50' : 'border-yellow-600 bg-yellow-700 hover:border-yellow-500 shadow-md shadow-yellow-400/30'}`}
+    onClick={() => handleSkinChange(velocistaSkin.id)}>
+    <div className="w-16 h-20 sm:w-20 sm:h-24 flex items-center justify-center">
+      <Image src={velocistaSkin.image} alt={velocistaSkin.name} width={60} height={75} className="object-contain max-w-full max-h-full"/>
+    </div>
+    <p className="text-xs mt-2 font-medium text-center break-words leading-tight text-yellow-200">⭐ {velocistaSkin.name} ⭐</p>
+    {selectedSkin === velocistaSkin.id && <p className="text-xs text-yellow-300 mt-1 text-center">✓ Selecionada</p>}
+  </div>
+)
+}
+          
+          {/* Skins normais */}
+          {skins.map((skin) => (
+            <div
+              key={skin.id}
+              className={`cursor-pointer border-2 rounded-lg p-2 sm:p-3 transition duration-300 flex flex-col items-center ${
+                selectedSkin === skin.id 
+                  ? 'border-purple-400 bg-purple-800' 
+                  : 'border-gray-600 bg-purple-700 hover:border-purple-500'
+              }`}
+              onClick={() => handleSkinChange(skin.id)}
+            >
+              <div className="w-16 h-20 sm:w-20 sm:h-24 flex items-center justify-center">
+                <Image
+                  src={skin.image}
+                  alt={skin.name}
+                  width={60}
+                  height={75}
+                  className="object-contain max-w-full max-h-full"
+                />
+              </div>
+              <p className="text-xs mt-2 font-medium text-center break-words leading-tight">
+                {skin.name}
+              </p>
+              {selectedSkin === skin.id && (
+                <p className="text-xs text-purple-300 mt-1 text-center">✓ Selecionada</p>
+              )}
+            </div>
+          ))}
         </div>
-      )}
+      </div>
+      
+      <button 
+        className="mt-2 sm:mt-4 text-white hover:text-gray-300 flex items-center justify-center gap-2 mx-auto transition duration-300" 
+        onClick={() => {
+          setShowSkinModal(false);
+          setSkinSearchText('');
+          setShowSecretSkin(false);
+          setShowBurgaSkin(false);
+  setShowSerafimSkin(false); 
+  setShowCorinthiansSkin(false);
+  setShowVelocistaSkin(false);
+        }}
+      >
+        <CloseIcon fontSize="small" />
+        Fechar
+      </button>
+    </div>
+  </div>
+)}
 {showChangePasswordModal && (
   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 p-4">
     <div className="bg-purple-900 border border-purple-400 p-6 sm:p-8 rounded-lg text-center shadow-lg w-full max-w-sm sm:max-w-md">

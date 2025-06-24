@@ -105,7 +105,28 @@ const SimulacoesProf: React.FC = () => {
       id: 'galileupolicial',
       name: 'Galileu Policial',
       image: '/images/galileupolicial.png'
-    }
+    },
+    {
+  id: 'galileudias',
+  name: 'Galileu Dias',
+  image: '/images/galileudias.png'
+},{
+  id: 'galileuburga',
+  name: 'Galileu Burga',
+  image: '/images/galileuburga.png'
+},{
+  id: 'galileuserafim', 
+  name: 'Galileu Serafim',
+  image: '/images/galileuserafim.png'
+}, {
+  id: 'galileucorinthians',
+  name: 'Galileu Corinthians', 
+  image: '/images/galileucorinthians.png'
+},{
+  id: 'galileuvelocista',
+  name: 'Galileu Velocista',
+  image: '/images/galileuvelocista.png'
+}
   ];
 
   // NOVO: Função para carregar skin selecionada do localStorage
