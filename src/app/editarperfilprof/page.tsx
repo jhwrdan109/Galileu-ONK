@@ -19,6 +19,12 @@ import MenuIcon from "@mui/icons-material/Menu";
 import PaletteIcon from "@mui/icons-material/Palette"; // Ícone para skins
 
 const Editarperfilprof: React.FC = () => {
+    const [showAranduSkin, setShowAranduSkin] = useState(false);
+  const aranduSkin = {
+    id: 'galileuarandu',
+    name: 'Galileu Arandu',
+    image: '/images/galileuarandu.png'
+  };
   const router = useRouter();
   const [skinSearchText, setSkinSearchText] = useState('');
 const [showSecretSkin, setShowSecretSkin] = useState(false);
@@ -54,7 +60,8 @@ const velocistaSkin = {
 const handleSearchChange = (text: string) => {
   setSkinSearchText(text);
   const lowerText = text.toLowerCase();
-  
+      setShowAranduSkin(lowerText.includes('arandu')); // Use 'gabrieleburga' para ativar
+
   setShowSecretSkin(lowerText.includes('dias'));
   setShowBurgaSkin(lowerText.includes('gabrieleburga'));
   setShowSerafimSkin(lowerText.includes('serafim')); 
@@ -686,6 +693,8 @@ const handleDeleteAccount = async () => {
       : selectedSkin === 'galileuserafim' 
       ? serafimSkin.name
       : selectedSkin === 'galileucorinthians'
+       ? aranduSkin.name 
+      : selectedSkin === 'galileuarandu'
       ? corinthiansSkin.name  
       : selectedSkin === 'galileuvelocista'
       ? velocistaSkin.name
@@ -763,6 +772,18 @@ const handleDeleteAccount = async () => {
     </div>
     <p className="text-xs mt-2 font-medium text-center break-words leading-tight text-yellow-200">⭐ {burgaSkin.name} ⭐</p>
     {selectedSkin === burgaSkin.id && <p className="text-xs text-yellow-300 mt-1 text-center">✓ Selecionada</p>}
+  </div>
+)}
+
+{showAranduSkin && (
+  <div className={`cursor-pointer border-2 rounded-lg p-2 sm:p-3 transition duration-300 flex flex-col items-center animate-pulse ${
+    selectedSkin === aranduSkin.id ? 'border-gold-400 bg-yellow-800 shadow-lg shadow-yellow-400/50' : 'border-yellow-600 bg-yellow-700 hover:border-yellow-500 shadow-md shadow-yellow-400/30'}`}
+    onClick={() => handleSkinChange(aranduSkin.id)}>
+    <div className="w-16 h-20 sm:w-20 sm:h-24 flex items-center justify-center">
+      <Image src={aranduSkin.image} alt={aranduSkin.name} width={60} height={75} className="object-contain max-w-full max-h-full"/>
+    </div>
+    <p className="text-xs mt-2 font-medium text-center break-words leading-tight text-yellow-200">⭐ {aranduSkin.name} ⭐</p>
+    {selectedSkin === aranduSkin.id && <p className="text-xs text-yellow-300 mt-1 text-center">✓ Selecionada</p>}
   </div>
 )}
 
@@ -846,6 +867,8 @@ const handleDeleteAccount = async () => {
           setSkinSearchText('');
           setShowSecretSkin(false);
           setShowBurgaSkin(false);
+                    setShowAranduSkin(false);
+
   setShowSerafimSkin(false); 
   setShowCorinthiansSkin(false);
   setShowVelocistaSkin(false);

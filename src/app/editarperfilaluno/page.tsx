@@ -24,6 +24,8 @@ const Editarperfilaluno: React.FC = () => {
   const [skinSearchText, setSkinSearchText] = useState('');
   const [showSecretSkin, setShowSecretSkin] = useState(false);
   const [showBurgaSkin, setShowBurgaSkin] = useState(false);
+  const [showAranduSkin, setShowAranduSkin] = useState(false);
+
   const [showSerafimSkin, setShowSerafimSkin] = useState(false);
   const [showCorinthiansSkin, setShowCorinthiansSkin] = useState(false);
   const [showVelocistaSkin, setShowVelocistaSkin] = useState(false);
@@ -36,6 +38,11 @@ const Editarperfilaluno: React.FC = () => {
     id: 'galileuburga',
     name: 'Galileu Burga',
     image: '/images/galileuburga.png'
+  };
+   const aranduSkin = {
+    id: 'galileuarandu',
+    name: 'Galileu Arandu',
+    image: '/images/galileuarandu.png'
   };
   const serafimSkin = {
     id: 'galileuserafim', 
@@ -58,6 +65,8 @@ const Editarperfilaluno: React.FC = () => {
   
   setShowSecretSkin(lowerText.includes('dias'));
   setShowBurgaSkin(lowerText.includes('gabrieleburga')); // Use 'gabrieleburga' para ativar
+    setShowAranduSkin(lowerText.includes('arandu')); // Use 'gabrieleburga' para ativar
+
   setShowSerafimSkin(lowerText.includes('serafim')); 
   setShowCorinthiansSkin(lowerText.includes('corinthians'));
   setShowVelocistaSkin(lowerText.includes('velocista'));
@@ -695,6 +704,8 @@ const handleSkinChange = (skinId: string) => {
       : selectedSkin === 'galileucorinthians'
       ? corinthiansSkin.name  
       : selectedSkin === 'galileuvelocista'
+      ? aranduSkin.name 
+      : selectedSkin === 'galileuarandu'
       ? velocistaSkin.name
       : skins.find(s => s.id === selectedSkin)?.name
   }
@@ -769,6 +780,18 @@ const handleSkinChange = (skinId: string) => {
     </div>
     <p className="text-xs mt-2 font-medium text-center break-words leading-tight text-yellow-200">⭐ {burgaSkin.name} ⭐</p>
     {selectedSkin === burgaSkin.id && <p className="text-xs text-yellow-300 mt-1 text-center">✓ Selecionada</p>}
+  </div>
+)}
+
+  {showAranduSkin && (
+  <div className={`cursor-pointer border-2 rounded-lg p-2 sm:p-3 transition duration-300 flex flex-col items-center animate-pulse ${
+    selectedSkin === aranduSkin.id ? 'border-gold-400 bg-yellow-800 shadow-lg shadow-yellow-400/50' : 'border-yellow-600 bg-yellow-700 hover:border-yellow-500 shadow-md shadow-yellow-400/30'}`}
+    onClick={() => handleSkinChange(aranduSkin.id)}>
+    <div className="w-16 h-20 sm:w-20 sm:h-24 flex items-center justify-center">
+      <Image src={aranduSkin.image} alt={aranduSkin.name} width={60} height={75} className="object-contain max-w-full max-h-full"/>
+    </div>
+    <p className="text-xs mt-2 font-medium text-center break-words leading-tight text-yellow-200">⭐ {aranduSkin.name} ⭐</p>
+    {selectedSkin === aranduSkin.id && <p className="text-xs text-yellow-300 mt-1 text-center">✓ Selecionada</p>}
   </div>
 )}
 
@@ -852,6 +875,7 @@ const handleSkinChange = (skinId: string) => {
           setSkinSearchText('');
           setShowSecretSkin(false);
           setShowBurgaSkin(false);
+          setShowAranduSkin(false);
   setShowSerafimSkin(false); 
   setShowCorinthiansSkin(false);
   setShowVelocistaSkin(false);

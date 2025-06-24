@@ -150,6 +150,11 @@ const CriarQuestao = () => {
   id: 'galileuvelocista',
   name: 'Galileu Velocista',
   image: '/images/galileuvelocista.png'
+},
+{
+  id: 'galileuarandu',
+  name: 'Galileu Arandu',
+  image: '/images/galileuarandu.png'
 }
 
 
