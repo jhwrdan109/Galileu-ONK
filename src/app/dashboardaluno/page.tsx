@@ -302,6 +302,18 @@ const Dashboardaluno: React.FC = () => {
           <p className="text-sm sm:text-base md:text-lg lg:text-xl text-purple-200 mb-8 sm:mb-12 max-w-full lg:max-w-3xl text-left leading-relaxed">
             O Projeto Galileu busca melhorar a compreensão da matéria de Plano Inclinado da disciplina de Física, tornando-a mais eficaz.
           </p>
+  <button
+    onClick={() => setShowTutorial(true)}
+    className="text-white mb-5 px-4 py-2 xl:px-6 xl:py-3 rounded-md border border-purple-400 bg-purple-900 hover:text-purple-300 hover:border-purple-300 transition duration-300 shadow-md hover:shadow-lg text-sm xl:text-base"
+  >
+    Ver Tutorial
+  </button>
+  <button
+    onClick={() => router.push("/minigame")}
+    className="text-white px-4 py-2 xl:px-6 xl:py-3 rounded-md border border-purple-400 bg-transparent hover:text-purple-300 hover:border-purple-300 transition duration-300 shadow-md hover:shadow-lg text-sm xl:text-base"
+  >
+    Minigame
+  </button>
         </main>
       </div>
 
