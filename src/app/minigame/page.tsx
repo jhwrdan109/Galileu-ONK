@@ -33,7 +33,7 @@ const Minigame: React.FC = () => {
       if (data) {
         const entries = Object.entries(data) as [string, PlayerScore][];
         const sorted = entries
-          .map(([_, value]) => value)
+          .map(([, value]) => value)
           .sort((a, b) => b.score - a.score)
           .slice(0, 5);
         setRanking(sorted);
