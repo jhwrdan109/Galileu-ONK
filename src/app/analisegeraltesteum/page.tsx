@@ -528,6 +528,25 @@ const AnaliseSimulacao: React.FC = () => {
     });
   };
 
+  // Função para registrar o início da simulação no ranking
+  const registrarInicioSimulacao = async (userName: string) => {
+    const database = getDatabase(app);
+    const simulacoesIniciadasRef = ref(database, "simulacoes_iniciadas");
+    const novoRegistroRef = push(simulacoesIniciadasRef);
+    
+    try {
+      await set(novoRegistroRef, {
+        userName: userName,
+        timestamp: new Date().toISOString(),
+        data: new Date().toLocaleDateString("pt-BR"),
+        hora: new Date().toLocaleTimeString("pt-BR")
+      });
+      console.log("Início de simulação registrado com sucesso para:", userName);
+    } catch (error) {
+      console.error("Erro ao registrar início da simulação:", error);
+    }
+  };
+
   const iniciarSimulacao = () => {
     if (simulationStarted) return;
 
@@ -543,6 +562,11 @@ const AnaliseSimulacao: React.FC = () => {
     
     // Definir o estado de carregamento como verdadeiro
     setLoadingData(true);
+
+    // NOVO: Registrar o início da simulação para o ranking
+    if (userName) {
+      registrarInicioSimulacao(userName);
+    }
       
     set(novaSimulacaoRef, {
       userName,
@@ -640,7 +664,7 @@ const AnaliseSimulacao: React.FC = () => {
       backgroundAttachment: "fixed",
     }}>
       <GalieluExplicacaoInicio/>
-      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+      <div className="container mx-auto px-2 sm "></div><div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
         {/* Header com navegação responsiva */}
         <header className="flex justify-between items-center mb-8 sm:mb-16 relative">
           <Image
@@ -669,6 +693,14 @@ const AnaliseSimulacao: React.FC = () => {
                   className="text-white px-4 lg:px-6 py-2 lg:py-3 rounded-md border border-purple-400 bg-transparent hover:text-purple-300 hover:border-purple-300 transition duration-300 shadow-md hover:shadow-lg text-sm lg:text-base"
                 >
                   Simulações
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => router.push("/rankingaluno")} // Adicionado botão para o ranking
+                  className="text-white px-4 lg:px-6 py-2 lg:py-3 rounded-md border border-purple-400 bg-transparent hover:text-purple-300 hover:border-purple-300 transition duration-300 shadow-md hover:shadow-lg text-sm lg:text-base"
+                >
+                  Ranking
                 </button>
               </li>
               <li>
@@ -715,6 +747,17 @@ const AnaliseSimulacao: React.FC = () => {
                     className="w-full text-left text-white px-4 py-3 hover:bg-purple-700 transition duration-300"
                   >
                     Simulações
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => {
+                      router.push("/ranking"); // Adicionado botão para o ranking no menu mobile
+                      fecharMenu();
+                    }}
+                    className="w-full text-left text-white px-4 py-3 hover:bg-purple-700 transition duration-300"
+                  >
+                    Ranking
                   </button>
                 </li>
                 <li>

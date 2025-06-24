@@ -550,7 +550,7 @@ const CriarSalaSupabaseFirebase = () => {
                   {isLoadingSupabase ? "Criando..." : "Criar Sala"}
                 </button>
               </div>
-
+              
               {codigoSala && (
                 <div className="mt-4 sm:mt-6">
                   <button
@@ -583,9 +583,19 @@ const CriarSalaSupabaseFirebase = () => {
                 </div>
               )}
             </form>
+            
           </div>
+          
         </div>
+        
       </div>
+      <div className="flex justify-center">
+  <button               onClick={() => router.push("/criarquestaoprof")}
+
+  className="w-full sm:w-auto bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 mt-2 sm:py-3 px-4 sm:px-6 rounded transition duration-300 text-sm sm:text-base">
+    Criar questão
+  </button>
+</div>
     </div>
   );
 };

@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { supabase } from '../../../lib/supabase';
 import { auth } from '../../../lib/firebaseConfig'; // Ajuste o caminho conforme sua estrutura
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, deleteUser, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth'; // Adicione deleteUser, updatePassword, EmailAuthProvider, reauthenticateWithCredential
+
 import LogoutIcon from "@mui/icons-material/Logout";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -20,7 +21,96 @@ import PaletteIcon from "@mui/icons-material/Palette"; // Ícone para skins
 
 const Editarperfilaluno: React.FC = () => {
   const router = useRouter();
-  
+  // Dentro do seu componente Editarperfilprof:
+const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+const [currentPassword, setCurrentPassword] = useState('');
+const [newPassword, setNewPassword] = useState('');
+const [confirmNewPassword, setConfirmNewPassword] = useState('');
+const [passwordError, setPasswordError] = useState('');
+const [passwordSuccess, setPasswordSuccess] = useState('');
+
+const handleChangePassword = async () => {
+  setPasswordError('');
+  setPasswordSuccess('');
+
+  if (newPassword !== confirmNewPassword) {
+    setPasswordError('A nova senha e a confirmação não coincidem.');
+    return;
+  }
+
+  if (newPassword.length < 6) { // Firebase exige no mínimo 6 caracteres
+    setPasswordError('A nova senha deve ter pelo menos 6 caracteres.');
+    return;
+  }
+
+  const user = auth.currentUser;
+  if (!user) {
+    setPasswordError('Nenhum usuário logado.');
+    return;
+  }
+
+  try {
+    // Reautenticar o usuário
+    const credential = EmailAuthProvider.credential(user.email!, currentPassword);
+    await reauthenticateWithCredential(user, credential);
+
+    // Se a reautenticação for bem-sucedida, atualize a senha
+    await updatePassword(user, newPassword);
+    setPasswordSuccess('Senha alterada com sucesso!');
+    setShowChangePasswordModal(false);
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmNewPassword('');
+  } catch (error: any) {
+    console.error('Erro ao alterar senha:', error);
+    if (error.code === 'auth/wrong-password') {
+      setPasswordError('Senha atual incorreta.');
+    } else if (error.code === 'auth/requires-recent-login') {
+      setPasswordError('Por favor, faça login novamente para alterar sua senha.');
+      // Você pode redirecionar para a página de login aqui ou forçar um re-login
+      // router.push('/login');
+    } else {
+      setPasswordError('Erro ao alterar senha. Tente novamente.');
+    }
+  }
+};
+// Dentro do seu componente Editarperfilprof:
+const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+const [deletePassword, setDeletePassword] = useState('');
+const [deleteError, setDeleteError] = useState('');
+
+const handleDeleteAccount = async () => {
+  setDeleteError('');
+
+  const user = auth.currentUser;
+  if (!user) {
+    setDeleteError('Nenhum usuário logado.');
+    return;
+  }
+
+  try {
+    // Reautenticar o usuário antes de deletar
+    const credential = EmailAuthProvider.credential(user.email!, deletePassword);
+    await reauthenticateWithCredential(user, credential);
+
+    // Se a reautenticação for bem-sucedida, delete a conta
+    await deleteUser(user);
+    localStorage.removeItem("user"); // Limpa o localStorage
+    router.push("/login"); // Redireciona para a página de login
+  } catch (error: any) {
+    console.error('Erro ao deletar conta:', error);
+    if (error.code === 'auth/wrong-password') {
+      setDeleteError('Senha incorreta.');
+    } else if (error.code === 'auth/requires-recent-login') {
+      setDeleteError('Por favor, faça login novamente para deletar sua conta.');
+      // Você pode redirecionar para a página de login aqui ou forçar um re-login
+      // router.push('/login');
+    } else {
+      setDeleteError('Erro ao deletar conta. Tente novamente.');
+    }
+  }
+};
+
   const [user, setUser] = useState({
     uid: "", // Mudança: usar UID do Firebase
     name: "Aluno",
@@ -458,11 +548,15 @@ const Editarperfilaluno: React.FC = () => {
         {/* Container da Esquerda */}
         <div className="bg-purple-800 p-4 sm:p-6 lg:p-8 rounded-lg w-full lg:w-2/5 shadow-lg border border-purple-400">
           <div className="space-y-3 sm:space-y-4 lg:space-y-5">
-            <button className="w-full bg-red-600 py-2 sm:py-3 rounded-md hover:bg-red-500 flex items-center justify-center gap-2 text-sm sm:text-base lg:text-lg transition duration-300">
-              <DeleteIcon fontSize="small" />
-              <span className="hidden sm:inline">Deletar conta</span>
-              <span className="sm:hidden">Deletar</span>
-            </button>
+            <button
+  className="w-full bg-red-600 py-2 sm:py-3 rounded-md hover:bg-red-500 flex items-center justify-center gap-2 text-sm sm:text-base lg:text-lg transition duration-300"
+  onClick={() => setShowDeleteAccountModal(true)} // Adicione este onClick
+>
+  <DeleteIcon fontSize="small" />
+  <span className="hidden sm:inline">Deletar conta</span>
+  <span className="sm:hidden">Deletar</span>
+</button>
+
             <button
               className="w-full bg-yellow-500 py-2 sm:py-3 rounded-md hover:bg-yellow-400 flex items-center justify-center gap-2 text-sm sm:text-base lg:text-lg transition duration-300"
               onClick={() => setShowAccountModal(true)}
@@ -471,18 +565,16 @@ const Editarperfilaluno: React.FC = () => {
               <span className="hidden sm:inline">Mudar tipo de conta</span>
               <span className="sm:hidden">Tipo conta</span>
             </button>
-            <button className="w-full bg-blue-500 py-2 sm:py-3 rounded-md hover:bg-blue-400 flex items-center justify-center gap-2 text-sm sm:text-base lg:text-lg transition duration-300">
-              <PasswordIcon fontSize="small" />
-              <span className="hidden sm:inline">Alterar Senha</span>
-              <span className="sm:hidden">Senha</span>
-            </button>
-            <button
-              className="w-full bg-gray-600 py-2 sm:py-3 rounded-md hover:bg-gray-500 flex items-center justify-center gap-2 text-sm sm:text-base lg:text-lg transition duration-300"
-              onClick={handleLanguageToggle}
-            >
-              <LanguageIcon fontSize="small" />
-              Idioma
-            </button>
+           <button
+  className="w-full bg-blue-500 py-2 sm:py-3 rounded-md hover:bg-blue-400 flex items-center justify-center gap-2 text-sm sm:text-base lg:text-lg transition duration-300"
+  onClick={() => setShowChangePasswordModal(true)} // Adicione este onClick
+>
+  <PasswordIcon fontSize="small" />
+  <span className="hidden sm:inline">Alterar Senha</span>
+  <span className="sm:hidden">Senha</span>
+</button>
+
+            
             {/* NOVO BOTÃO PARA SKINS */}
             <button
               className="w-full bg-pink-600 py-2 sm:py-3 rounded-md hover:bg-pink-500 flex items-center justify-center gap-2 text-sm sm:text-base lg:text-lg transition duration-300"
@@ -613,6 +705,87 @@ const Editarperfilaluno: React.FC = () => {
           </div>
         </div>
       )}
+{showChangePasswordModal && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 p-4">
+    <div className="bg-purple-900 border border-purple-400 p-6 sm:p-8 rounded-lg text-center shadow-lg w-full max-w-sm sm:max-w-md">
+      <h2 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6">Alterar Senha</h2>
+      {passwordError && <p className="text-red-400 mb-4">{passwordError}</p>}
+      {passwordSuccess && <p className="text-green-400 mb-4">{passwordSuccess}</p>}
+      <input
+        type="password"
+        placeholder="Senha Atual"
+        className="w-full p-3 mb-3 rounded-md bg-gray-700 text-white placeholder-gray-400"
+        value={currentPassword}
+        onChange={(e) => setCurrentPassword(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Nova Senha"
+        className="w-full p-3 mb-3 rounded-md bg-gray-700 text-white placeholder-gray-400"
+        value={newPassword}
+        onChange={(e) => setNewPassword(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Confirmar Nova Senha"
+        className="w-full p-3 mb-6 rounded-md bg-gray-700  text-white placeholder-gray-400"
+        value={confirmNewPassword}
+        onChange={(e) => setConfirmNewPassword(e.target.value)}
+      />
+      <button
+        onClick={handleChangePassword}
+        className="w-full py-2 sm:py-3 rounded-md mb-3 sm:mb-4 bg-blue-600 text-white hover:bg-blue-500 text-sm sm:text-base transition duration-300"
+      >
+        Confirmar Alteração
+      </button>
+      <button
+        onClick={() => {
+          setShowChangePasswordModal(false);
+          setPasswordError('');
+          setPasswordSuccess('');
+          setCurrentPassword('');
+          setNewPassword('');
+          setConfirmNewPassword('');
+        }}
+        className="w-full py-2 sm:py-3 rounded-md bg-gray-600 text-white hover:bg-gray-500 text-sm sm:text-base transition duration-300"
+      >
+        Cancelar
+      </button>
+    </div>
+  </div>
+)}
+{showDeleteAccountModal && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50 p-4">
+    <div className="bg-purple-900 border border-purple-400 p-6 sm:p-8 rounded-lg text-center shadow-lg w-full max-w-sm sm:max-w-md">
+      <h2 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6">Deletar Conta</h2>
+      {deleteError && <p className="text-red-400 mb-4">{deleteError}</p>}
+      <p className="text-white mb-4">Tem certeza que deseja deletar sua conta? Esta ação é irreversível.</p>
+      <input
+        type="password"
+        placeholder="Digite sua senha para confirmar"
+        className="w-full p-3 mb-6 rounded-md bg-gray-700 text-white placeholder-gray-400"
+        value={deletePassword}
+        onChange={(e) => setDeletePassword(e.target.value)}
+      />
+      <button
+        onClick={handleDeleteAccount}
+        className="w-full py-2 sm:py-3 rounded-md mb-3 sm:mb-4 bg-red-600 text-white hover:bg-red-500 text-sm sm:text-base transition duration-300"
+      >
+        Sim, Deletar Minha Conta
+      </button>
+      <button
+        onClick={() => {
+          setShowDeleteAccountModal(false);
+          setDeletePassword('');
+          setDeleteError('');
+        }}
+        className="w-full py-2 sm:py-3 rounded-md bg-gray-600 text-white hover:bg-gray-500 text-sm sm:text-base transition duration-300"
+      >
+        Cancelar
+      </button>
+    </div>
+  </div>
+)}
 
       {/* MODAL - Mudar Tipo de Conta */}
       {showAccountModal && (
