@@ -6,7 +6,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getDatabase, ref, onValue, set, push, update } from "firebase/database";
 import { app } from "../../../lib/firebaseConfig";
-import ForcasSVG from "@/components/ForcasSVG";
+import ForcasSVG from "../../components/ForcasSVG";
 import Image from "next/image";
 import GalieluExplicacaoInicio from "../galileuexplicacaoinicio/page"
 import {
@@ -17,6 +17,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend // Adicionado para a legenda dos gráficos
 } from "recharts";
 
 // Ícone do hambúrguer
@@ -333,8 +334,13 @@ const AnaliseSimulacao: React.FC = () => {
     ? py - forcaAtrito 
     : null;
 
-  // Dados para o gráfico
+  // Dados para o gráfico de Aceleração vs Ângulo
   const [dadosGrafico, setDadosGrafico] = useState<Array<{angulo: number, aceleracao: number}>>([]);
+
+  // NOVOS ESTADOS PARA OS GRÁFICOS DE VELOCIDADE E DISTÂNCIA POR TEMPO (AGORA NO LUGAR CERTO)
+  const [historicoVelocidadeTempo, setHistoricoVelocidadeTempo] = useState<Array<{tempo: number, velocidade: number}>>([]);
+  const [historicoDistanciaTempo, setHistoricoDistanciaTempo] = useState<Array<{tempo: number, distancia: number}>>([]);
+  const [lastRecordedTime, setLastRecordedTime] = useState<number | null>(null); // Para evitar duplicação de pontos no gráfico
 
   // Função para alternar o menu
   const alternarMenu = () => {
@@ -514,6 +520,18 @@ const AnaliseSimulacao: React.FC = () => {
     };
   }, [simulationStarted, simulacaoId]);
 
+  // NOVO EFEITO: Atualiza os históricos de velocidade e distância por tempo (AGORA NO LUGAR CERTO)
+  useEffect(() => {
+    if (simulationStarted && tempo !== null && velocidade !== null && distancia !== null) {
+      // Adiciona um novo ponto apenas se o tempo avançou
+      if (lastRecordedTime === null || tempo > lastRecordedTime) {
+        setHistoricoVelocidadeTempo(prev => [...prev, { tempo: parseFloat(tempo.toFixed(2)), velocidade: parseFloat(velocidade.toFixed(2)) }]);
+        setHistoricoDistanciaTempo(prev => [...prev, { tempo: parseFloat(tempo.toFixed(2)), distancia: parseFloat(distancia.toFixed(2)) }]);
+        setLastRecordedTime(tempo);
+      }
+    }
+  }, [tempo, velocidade, distancia, simulationStarted, lastRecordedTime]);
+
   const gerarDadosGrafico = () => {
     const database = getDatabase(app);
     const graficoRef = ref(database, "sensor/dadosGrafico");
@@ -559,6 +577,10 @@ const AnaliseSimulacao: React.FC = () => {
     const timestampInicio = new Date().toISOString();
     
     const liberarRef = ref(database, "sensor/liberar");
+    // Limpa os históricos dos gráficos ao iniciar uma nova simulação
+    setHistoricoVelocidadeTempo([]);
+    setHistoricoDistanciaTempo([]);
+    setLastRecordedTime(null);
     
     // Definir o estado de carregamento como verdadeiro
     setLoadingData(true);
@@ -642,6 +664,11 @@ const AnaliseSimulacao: React.FC = () => {
       .then(() => {
         setSimulationStarted(false);
         setSimulacaoId(null);
+        // Limpa os históricos dos gráficos ao finalizar a simulação
+        setHistoricoVelocidadeTempo([]);
+        setHistoricoDistanciaTempo([]);
+        setLastRecordedTime(null);
+
       })
       .catch((error) => {
         console.error("Erro ao finalizar simulação:", error);
@@ -676,7 +703,6 @@ const AnaliseSimulacao: React.FC = () => {
             className="hover:scale-105 transition-transform duration-300 cursor-pointer sm:w-[150px] sm:h-[150px]"
           />
           
-          {/* Menu Desktop */}
           <nav className="hidden md:block">
             <ul className="flex gap-4 lg:gap-6">
               <li>
@@ -713,7 +739,6 @@ const AnaliseSimulacao: React.FC = () => {
               </li>
             </ul>
           </nav>
-
           {/* Botão Hambúrguer Mobile */}
           <button
             onClick={alternarMenu}
@@ -818,16 +843,17 @@ const AnaliseSimulacao: React.FC = () => {
               <div className="bg-white p-3 sm:p-4 md:p-6 rounded-lg shadow-lg mb-6 sm:mb-12">
                 <h3 className="text-lg sm:text-xl font-semibold text-black mb-3 sm:mb-4">Representação das Forças</h3>
                 <div className="flex justify-center items-center h-64 sm:h-80 md:h-96 overflow-x-auto">
-                  <ForcasSVG
+                                    <ForcasSVG
                     forcaPeso={forcaPeso !== null ? forcaPeso : 0}
                     forcaNormal={forcaNormal !== null ? forcaNormal : 0}
                     forcaAtrito={forcaAtrito !== null ? forcaAtrito : 0}
                     px={px !== null ? px : 0}
                     py={py !== null ? py : 0}
                     forcaResultante={forcaResultante !== null ? forcaResultante : 0}
-                    anguloInicial={30}
+                    aceleracao={aceleracao !== null ? aceleracao : 0} // <-- ADICIONE ESTA LINHA
                     angulo={angulo !== null ? angulo : 30}
                   />
+
                 </div>
               </div>
 
@@ -846,40 +872,78 @@ const AnaliseSimulacao: React.FC = () => {
                 tempo={tempo}
               />
               
-              {/* Gráfico */}
-              <div className="bg-white p-3 sm:p-4 md:p-6 rounded-lg shadow-lg">
+              {/* Gráfico: Aceleração vs Ângulo */}
+             
+
+              {/* Gráfico: Velocidade vs Tempo */}
+              <div className="bg-white p-3 sm:p-4 md:p-6 rounded-lg shadow-lg mt-6">
                 <h3 className="text-lg sm:text-xl font-semibold text-black mb-3 sm:mb-4">
-                  Gráfico: Aceleração vs Ângulo
+                  Gráfico: Velocidade vs Tempo
                 </h3>
                 <div className="w-full overflow-x-auto">
                   <ResponsiveContainer width="100%" height={250} minWidth={300}>
                     <LineChart 
-                      data={dadosGrafico.length > 0 ? dadosGrafico : Array.from({length: 91}, (_, i) => ({angulo: i, aceleracao: 0}))}
+                      data={historicoVelocidadeTempo}
                       margin={{ top: 5, right: 30, left: 20, bottom: 20 }}
                     >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis 
-                        dataKey="angulo" 
-                        label={{ value: "Ângulo (°)", position: "insideBottomRight", offset: 0 }}
-                        domain={[0, 90]}
-                        ticks={[0, 15, 30, 45, 60, 75, 90]}
+                        dataKey="tempo" 
+                        label={{ value: "Tempo (s)", position: "insideBottomRight", offset: 0 }}
                       />
                       <YAxis 
-                        label={{ value: "Aceleração (m/s²)", angle: -90, position: "insideLeft" }}
-                        domain={[0, 10]}
+                        label={{ value: "Velocidade (m/s)", angle: -90, position: "insideLeft" }}
                       />
                       <Tooltip 
-                        formatter={(value) => [`${value} m/s²`, "Aceleração"]}
-                        labelFormatter={(label) => `Ângulo: ${label}°`}
+                        formatter={(value) => [`${value} m/s`, "Velocidade"]}
+                        labelFormatter={(label) => `Tempo: ${label} s`}
                       />
                       <Line
                         type="monotone"
-                        dataKey="aceleracao"
-                        stroke="#7c3aed"
+                        dataKey="velocidade"
+                        stroke="#82ca9d" // Cor diferente para este gráfico
                         strokeWidth={2}
                         dot={{ r: 2 }}
                         activeDot={{ r: 6 }}
                       />
+                      <Legend />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Gráfico: Distância vs Tempo */}
+              <div className="bg-white p-3 sm:p-4 md:p-6 rounded-lg shadow-lg mt-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-black mb-3 sm:mb-4">
+                  Gráfico: Distância vs Tempo
+                </h3>
+                <div className="w-full overflow-x-auto">
+                  <ResponsiveContainer width="100%" height={250} minWidth={300}>
+                    <LineChart 
+                      data={historicoDistanciaTempo}
+                      margin={{ top: 5, right: 30, left: 20, bottom: 20 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="tempo" 
+                        label={{ value: "Tempo (s)", position: "insideBottomRight", offset: 0 }}
+                      />
+                      <YAxis 
+                        label={{ value: "Distância (cm)", angle: -90, position: "insideLeft" }}
+                      />
+                      <Tooltip 
+                        formatter={(value) => [`${value} cm`, "Distância"]}
+                        labelFormatter={(label) => `Tempo: ${label} s`}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="distancia"
+                        stroke="#ffc658" // Outra cor diferente
+                        strokeWidth={2}
+                        dot={{ r: 2 }}
+                        activeDot={{ r: 6 }}
+                      />
+                      <Legend />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
