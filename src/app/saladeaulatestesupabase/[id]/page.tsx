@@ -791,11 +791,7 @@ const SalaDeAulaTesteSupabase: React.FC = () => {
                   <div key={questao.id} className="p-3 sm:p-4 border rounded-md bg-purple-900">
                     <div className="flex items-center gap-2 mb-2">
                       <h3 className="text-base sm:text-lg font-semibold">Questão {index + 1}:</h3>
-                      {isCorrect ? (
-                        <CheckCircle size={20} className="text-green-400" />
-                      ) : (
-                        <XCircle size={20} className="text-red-400" />
-                      )}
+                     
                     </div>
                     
                     <p className="whitespace-pre-line mb-3 text-sm sm:text-base leading-relaxed">{questao.enunciado}</p>
@@ -831,11 +827,9 @@ const SalaDeAulaTesteSupabase: React.FC = () => {
                                   isUserAnswer && isCorrectAnswer ? "text-green-400" : 
                                   isUserAnswer && !isCorrectAnswer ? "text-red-400" : ""
                                 }`}>
-                                  <span className="font-medium text-purple-300">{letra}:</span> {texto}
+                                  <span className="font-medium text-purple-300">{letra}</span>
                                 </span>
-                                {isUserAnswer && isCorrectAnswer && <CheckCircle size={16} className="text-green-400 mt-0.5 flex-shrink-0" />}
-                                {isUserAnswer && !isCorrectAnswer && <XCircle size={16} className="text-red-400 mt-0.5 flex-shrink-0" />}
-                                {isCorrectAnswer && !isUserAnswer && <span className="text-yellow-400 text-sm mt-0.5 flex-shrink-0">(Correta)</span>}
+                                
                               </label>
                             </li>
                           );
